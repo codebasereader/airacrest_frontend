@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@theme {
+  /* Typography */
+  --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Cinzel", ui-serif, Georgia, serif;
+  --font-script: "Great Vibes", cursive;
+
+  /* Cream palette — warm, elegant backgrounds */
+  --color-cream-50: #fdfcf9;
+  --color-cream-100: #faf7f2;
+  --color-cream-200: #f5f0e8;
+  --color-cream-300: #ede6d9;
+  --color-cream-400: #e0d6c8;
+  --color-cream-500: #d4c9b8;
+
+  /* Maroon palette — deep blackish-red accents */
+  --color-maroon-50: #f8eded;
+  --color-maroon-100: #edd5d6;
+  --color-maroon-200: #d4a0a2;
+  --color-maroon-300: #b86b6e;
+  --color-maroon-400: #9a4549;
+  --color-maroon-500: #7a2e35;
+  --color-maroon-600: #6e2229;
+  --color-maroon-700: #5c1a22;
+  --color-maroon-800: #4a1219;
+  --color-maroon-900: #3d0c11;
+  --color-maroon-950: #2a0a0a;
+
+  /* Gold accents — logo, CTAs, active nav */
+  --color-gold-300: #f0d078;
+  --color-gold-400: #e5a647;
+  --color-gold-500: #d4af37;
+  --color-gold-600: #c49a2c;
+
+  /* Header */
+  --color-header: #2b0505;
+}
+
+@layer base {
+  html {
+    @apply antialiased scroll-smooth;
+    scroll-padding-top: 140px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    @apply bg-cream-100 text-maroon-900 font-sans text-base leading-relaxed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    @apply text-maroon-950 font-semibold tracking-wide leading-tight;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl;
+  }
+
+  h5 {
+    @apply text-lg md:text-xl;
+  }
+
+  h6 {
+    @apply text-base md:text-lg;
+  }
+
+  p {
+    @apply text-maroon-800;
+  }
+
+  a {
+    @apply text-maroon-600 underline-offset-4 transition-colors duration-200;
+  }
+
+  a:hover {
+    @apply text-maroon-800;
+  }
+
+  ::selection {
+    @apply bg-maroon-200 text-maroon-950;
+  }
+}
