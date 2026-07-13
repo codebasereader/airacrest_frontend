@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:amplify": "npm run build && npm run zip:amplify",
+    "zip:amplify": "cd dist && zip -r ../amplify-deploy.zip . -x '*.DS_Store'",
     "lint": "eslint .",
     "preview": "vite preview"
   },
