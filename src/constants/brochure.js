@@ -1,4 +1,4 @@
-export const BROCHURE_PDF_URL = "/AiraCrestBrochureFinal.pdf";
+export const BROCHURE_PDF_URL = "/Aira_Crest_Brochure.pdf";
 export const BROCHURE_PDF_NAME = "Aira_Crest_Brochure.pdf";
 export const BROCHURE_SHARE_PATH = "/brochure";
 
