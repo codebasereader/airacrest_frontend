@@ -30,6 +30,8 @@ This document defines the API contract for the **Bulk Enquiry** form on the Aira
 
 The frontend displays `name` in uppercase and sends `_id` as the selected product reference.
 
+> The enquiry form now supports **multiple product rows**. The frontend may call `GET /api/products` repeatedly using the existing load-more response shape until all active products are loaded.
+
 ---
 
 ## Submit enquiry
@@ -52,7 +54,14 @@ The frontend displays `name` in uppercase and sends `_id` as the selected produc
     {
       "product": "6a44f623a8dd1b7cd96d193e",
       "estimatedQuantity": "500 kg",
-      "packagingPreference": "Bulk Cartons"
+      "packagingPreference": "Bulk Cartons",
+      "note": "Need organic certification and COA"
+    },
+    {
+      "product": "6a44f8b3e73256cd4a4e2af8",
+      "estimatedQuantity": "2 MT",
+      "packagingPreference": null,
+      "note": null
     }
   ],
   "message": "Looking for long-term supply partnership."
@@ -72,9 +81,10 @@ The frontend displays `name` in uppercase and sends `_id` as the selected produc
 | 7 | Product Interested In | `products[].product` | Yes | MongoDB ObjectId ref to `Product` |
 | 8 | Estimated Quantity | `products[].estimatedQuantity` | Yes | Free text, e.g. `500 kg`, `2 MT`, `1 container` |
 | 9 | Packaging Preference | `products[].packagingPreference` | No | One of: `Bulk Cartons`, `Retail Packs`, `Private Label`, `Custom` |
-| 10 | Your Message | `message` | No | Optional string, max ~2000 chars suggested |
+| 10 | Product Note | `products[].note` | No | Optional per-product note, e.g. grade, specs, certification, max 500 chars suggested |
+| 11 | Your Message | `message` | No | Optional string, max ~2000 chars suggested |
 
-> **Note:** The form currently submits a single product in the `products` array. The array shape is kept so multiple products can be supported later without breaking the contract.
+> **Important:** The form now submits **one or more** product rows in `products[]`. Each row must contain its own `product` and `estimatedQuantity`. `packagingPreference` and `note` are optional per row.
 
 ### Packaging preference values (enum)
 
@@ -86,6 +96,10 @@ The frontend displays `name` in uppercase and sends `_id` as the selected produc
 | `Custom` |
 
 Omit `packagingPreference` or send `null` when the user leaves it blank.
+
+### Product note
+
+`products[].note` is optional. Omit it or send `null` when the user leaves it blank.
 
 ---
 
@@ -107,6 +121,12 @@ const enquiryProductSchema = new Schema(
     packagingPreference: {
       type: String,
       enum: ["Bulk Cartons", "Retail Packs", "Private Label", "Custom", null],
+      default: null,
+    },
+    note: {
+      type: String,
+      trim: true,
+      maxlength: 500,
       default: null,
     },
   },
@@ -157,6 +177,7 @@ const enquirySchema = new Schema(
 | `products[].product` | Required; must reference an existing **active** product `_id` |
 | `products[].estimatedQuantity` | Required, non-empty after trim |
 | `products[].packagingPreference` | Optional; if present, must match enum |
+| `products[].note` | Optional; if present, must be ≤ 500 chars |
 | `message` | Optional |
 
 ### Example validation errors
@@ -218,7 +239,8 @@ const enquirySchema = new Schema(
         "name": "DEHYDRATED WHITE ONION"
       },
       "estimatedQuantity": "500 kg",
-      "packagingPreference": "Bulk Cartons"
+      "packagingPreference": "Bulk Cartons",
+      "note": "Need organic certification and COA"
     }
   ],
   "message": "Looking for long-term supply partnership.",
@@ -239,6 +261,19 @@ The earlier `FRONTEND-INTEGRATION` spec did not include contact fields. **Email*
 |-------------|------|----------|
 | `email` | `string` | Yes |
 | `phone` | `string` | Yes |
+
+---
+
+## Frontend behavior
+
+- The enquiry form supports **repeatable product rows**
+- Users can add multiple products before submitting
+- Each product row contains:
+  - `product` (required)
+  - `estimatedQuantity` (required)
+  - `packagingPreference` (optional)
+  - `note` (optional)
+- The backend should preserve the order of `products[]` as submitted
 
 ---
 

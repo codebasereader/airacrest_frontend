@@ -65,6 +65,13 @@ const BENEFITS = [
   },
 ];
 
+const createProductLine = () => ({
+  productId: "",
+  estimatedQuantity: "",
+  packagingPreference: "",
+  productNote: "",
+});
+
 const INITIAL_FORM = {
   name: "",
   companyName: "",
@@ -73,10 +80,7 @@ const INITIAL_FORM = {
   country: "",
   otherCountry: "",
   destinationPort: "",
-  productId: "",
-  estimatedQuantity: "",
-  packagingPreference: "",
-  productNote: "",
+  products: [createProductLine()],
   message: "",
 };
 
@@ -199,6 +203,49 @@ const Enquire = () => {
     setSubmitError("");
   };
 
+  const updateProductLine = (index, field) => (event) => {
+    const { value } = event.target;
+    setForm((prev) => ({
+      ...prev,
+      products: prev.products.map((line, lineIndex) =>
+        lineIndex === index ? { ...line, [field]: value } : line,
+      ),
+    }));
+    setErrors((prev) => {
+      if (!prev.products?.[index]?.[field] && !prev.products) return prev;
+      const nextProductErrors = [...(prev.products || [])];
+      nextProductErrors[index] = {
+        ...(nextProductErrors[index] || {}),
+        [field]: "",
+      };
+      return { ...prev, products: nextProductErrors };
+    });
+    setSubmitError("");
+  };
+
+  const addProductLine = () => {
+    setForm((prev) => ({
+      ...prev,
+      products: [...prev.products, createProductLine()],
+    }));
+    setSubmitError("");
+  };
+
+  const removeProductLine = (index) => {
+    setForm((prev) => {
+      if (prev.products.length === 1) return prev;
+      return {
+        ...prev,
+        products: prev.products.filter((_, lineIndex) => lineIndex !== index),
+      };
+    });
+    setErrors((prev) => ({
+      ...prev,
+      products: (prev.products || []).filter((_, lineIndex) => lineIndex !== index),
+    }));
+    setSubmitError("");
+  };
+
   const handleCountryChange = (event) => {
     const { value } = event.target;
     setForm((prev) => ({
@@ -241,16 +288,26 @@ const Enquire = () => {
       nextErrors.otherCountry = "Please enter your country name.";
     }
 
-    if (!form.productId) {
-      nextErrors.productId = "Please select a product.";
-    }
+    const productErrors = form.products.map((line) => {
+      const lineErrors = {};
 
-    if (!form.estimatedQuantity.trim()) {
-      nextErrors.estimatedQuantity = "Please enter an estimated quantity.";
-    }
+      if (!line.productId) {
+        lineErrors.productId = "Please select a product.";
+      }
 
-    if (form.productNote.trim().length > 500) {
-      nextErrors.productNote = "Product note must be 500 characters or less.";
+      if (!line.estimatedQuantity.trim()) {
+        lineErrors.estimatedQuantity = "Please enter an estimated quantity.";
+      }
+
+      if (line.productNote.trim().length > 500) {
+        lineErrors.productNote = "Product note must be 500 characters or less.";
+      }
+
+      return lineErrors;
+    });
+
+    if (productErrors.some((lineErrors) => Object.keys(lineErrors).length > 0)) {
+      nextErrors.products = productErrors;
     }
 
     setErrors(nextErrors);
@@ -272,14 +329,12 @@ const Enquire = () => {
       phone: form.phone.trim(),
       country: isOtherCountry ? form.otherCountry.trim() : form.country,
       destinationPort: form.destinationPort.trim() || undefined,
-      products: [
-        {
-          product: form.productId,
-          estimatedQuantity: form.estimatedQuantity.trim(),
-          packagingPreference: form.packagingPreference || undefined,
-          note: form.productNote.trim() || undefined,
-        },
-      ],
+      products: form.products.map((line) => ({
+        product: line.productId,
+        estimatedQuantity: line.estimatedQuantity.trim(),
+        packagingPreference: line.packagingPreference || undefined,
+        note: line.productNote.trim() || undefined,
+      })),
       message: form.message.trim() || undefined,
     };
 
@@ -366,7 +421,7 @@ const Enquire = () => {
                       ✓
                     </span>
                   </div>
-                  <h3 className="mt-5 font-heading text-lg font-bold tracking-[0.1em] text-maroon-900 sm:text-xl">
+                  <h3 className="mt-5 font-heading text-lg font-bold tracking-widest text-maroon-900 sm:text-xl">
                     THANK YOU FOR YOUR ENQUIRY
                   </h3>
                   <p className="mx-auto mt-3 max-w-md font-sans text-sm leading-relaxed text-maroon-700">
@@ -517,90 +572,141 @@ const Enquire = () => {
                     </FormField>
 
                     <div className="sm:col-span-2">
-                      <FormField
-                        id="enquiry-product"
-                        label="Product Interested In"
-                        required
-                        error={errors.productId || productsError}
-                      >
-                        <select
-                          id="enquiry-product"
-                          name="productId"
-                          value={form.productId}
-                          onChange={updateField("productId")}
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="font-sans text-xs font-semibold tracking-wide text-maroon-800">
+                            Products Interested In <span className="text-maroon-500">*</span>
+                          </p>
+                          <p className="mt-1 font-sans text-[11px] text-maroon-500">
+                            Add one or more products with quantity for each.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={addProductLine}
                           disabled={productsLoading || !!productsError}
-                          className={`${selectClass} ${errors.productId || productsError ? fieldErrorClass : ""} disabled:cursor-not-allowed disabled:opacity-60`}
+                          className="inline-flex items-center rounded-sm border border-maroon-200 bg-white px-3 py-2 font-sans text-[11px] font-semibold tracking-[0.12em] text-maroon-800 transition-colors duration-200 hover:border-maroon-400 hover:bg-cream-50 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          <option value="" disabled>
-                            {productsLoading
-                              ? "Loading products…"
-                              : "Select a product"}
-                          </option>
-                          {products.map((product) => (
-                            <option key={product._id} value={product._id}>
-                              {toBritishSpelling(product.name).toUpperCase()}
-                            </option>
-                          ))}
-                        </select>
-                      </FormField>
-                    </div>
+                          + ADD PRODUCT
+                        </button>
+                      </div>
 
-                    <FormField
-                      id="enquiry-quantity"
-                      label="Estimated Quantity"
-                      required
-                      error={errors.estimatedQuantity}
-                      hint="kg / MT / containers"
-                    >
-                      <input
-                        id="enquiry-quantity"
-                        type="text"
-                        name="estimatedQuantity"
-                        value={form.estimatedQuantity}
-                        onChange={updateField("estimatedQuantity")}
-                        placeholder="e.g. 500 kg, 2 MT, 1 container"
-                        className={`${fieldClass} ${errors.estimatedQuantity ? fieldErrorClass : ""}`}
-                      />
-                    </FormField>
+                      <div className="mt-4 space-y-4">
+                        {form.products.map((line, index) => {
+                          const lineErrors = errors.products?.[index] || {};
 
-                    <FormField
-                      id="enquiry-packaging"
-                      label="Packaging Preference"
-                    >
-                      <select
-                        id="enquiry-packaging"
-                        name="packagingPreference"
-                        value={form.packagingPreference}
-                        onChange={updateField("packagingPreference")}
-                        className={selectClass}
-                      >
-                        <option value="">Select packaging (optional)</option>
-                        {PACKAGING_OPTIONS.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </FormField>
+                          return (
+                            <div
+                              key={`enquiry-product-line-${index}`}
+                              className="rounded-xl border border-maroon-200/60 bg-cream-50/50 p-4"
+                            >
+                              <div className="mb-4 flex items-center justify-between gap-3">
+                                <p className="font-sans text-[11px] font-semibold tracking-widest text-maroon-700 uppercase">
+                                  Product {index + 1}
+                                </p>
+                                {form.products.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => removeProductLine(index)}
+                                    className="font-sans text-[11px] font-semibold tracking-[0.12em] text-maroon-600 uppercase transition-colors hover:text-maroon-900"
+                                  >
+                                    Remove
+                                  </button>
+                                )}
+                              </div>
 
-                    <div className="sm:col-span-2">
-                      <FormField
-                        id="enquiry-product-note"
-                        label="Product Note (optional)"
-                        error={errors.productNote}
-                        hint="Specs, grade, certification requirements, etc. (max 500 characters)"
-                      >
-                        <textarea
-                          id="enquiry-product-note"
-                          name="productNote"
-                          rows={3}
-                          maxLength={500}
-                          value={form.productNote}
-                          onChange={updateField("productNote")}
-                          placeholder="e.g. Need organic certification and COA"
-                          className={`${fieldClass} resize-none ${errors.productNote ? fieldErrorClass : ""}`}
-                        />
-                      </FormField>
+                              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
+                                <div className="sm:col-span-2">
+                                  <FormField
+                                    id={`enquiry-product-${index}`}
+                                    label="Product"
+                                    required
+                                    error={lineErrors.productId || productsError}
+                                  >
+                                    <select
+                                      id={`enquiry-product-${index}`}
+                                      name={`productId-${index}`}
+                                      value={line.productId}
+                                      onChange={updateProductLine(index, "productId")}
+                                      disabled={productsLoading || !!productsError}
+                                      className={`${selectClass} ${lineErrors.productId || productsError ? fieldErrorClass : ""} disabled:cursor-not-allowed disabled:opacity-60`}
+                                    >
+                                      <option value="" disabled>
+                                        {productsLoading
+                                          ? "Loading products…"
+                                          : "Select a product"}
+                                      </option>
+                                      {products.map((product) => (
+                                        <option key={product._id} value={product._id}>
+                                          {toBritishSpelling(product.name).toUpperCase()}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </FormField>
+                                </div>
+
+                                <FormField
+                                  id={`enquiry-quantity-${index}`}
+                                  label="Estimated Quantity"
+                                  required
+                                  error={lineErrors.estimatedQuantity}
+                                  hint="kg / MT / containers"
+                                >
+                                  <input
+                                    id={`enquiry-quantity-${index}`}
+                                    type="text"
+                                    name={`estimatedQuantity-${index}`}
+                                    value={line.estimatedQuantity}
+                                    onChange={updateProductLine(index, "estimatedQuantity")}
+                                    placeholder="e.g. 500 kg, 2 MT, 1 container"
+                                    className={`${fieldClass} ${lineErrors.estimatedQuantity ? fieldErrorClass : ""}`}
+                                  />
+                                </FormField>
+
+                                <FormField
+                                  id={`enquiry-packaging-${index}`}
+                                  label="Packaging Preference"
+                                >
+                                  <select
+                                    id={`enquiry-packaging-${index}`}
+                                    name={`packagingPreference-${index}`}
+                                    value={line.packagingPreference}
+                                    onChange={updateProductLine(index, "packagingPreference")}
+                                    className={selectClass}
+                                  >
+                                    <option value="">Select packaging (optional)</option>
+                                    {PACKAGING_OPTIONS.map((option) => (
+                                      <option key={option} value={option}>
+                                        {option}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </FormField>
+
+                                <div className="sm:col-span-2">
+                                  <FormField
+                                    id={`enquiry-product-note-${index}`}
+                                    label="Product Note (optional)"
+                                    error={lineErrors.productNote}
+                                    hint="Specs, grade, certification requirements, etc. (max 500 characters)"
+                                  >
+                                    <textarea
+                                      id={`enquiry-product-note-${index}`}
+                                      name={`productNote-${index}`}
+                                      rows={3}
+                                      maxLength={500}
+                                      value={line.productNote}
+                                      onChange={updateProductLine(index, "productNote")}
+                                      placeholder="e.g. Need organic certification and COA"
+                                      className={`${fieldClass} resize-none ${lineErrors.productNote ? fieldErrorClass : ""}`}
+                                    />
+                                  </FormField>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     <div className="sm:col-span-2">

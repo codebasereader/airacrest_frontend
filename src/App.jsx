@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import ScrollToHash from "./components/ScrollToHash";
-// import ChatBot from "./components/ChatBot";
+import ChatBot from "./components/ChatBot";
 import AuthHandler from "./components/auth/AuthHandler";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Header from "./components/Header";
@@ -45,7 +45,7 @@ const App = () => {
     <>
       <AuthHandler />
       <ScrollToHash />
-      {/* <ChatBot /> */}
+      <ChatBot />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<ProductsPage />} />
