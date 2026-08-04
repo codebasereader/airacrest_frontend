@@ -63,9 +63,13 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-12 xl:gap-16">
           {/* Logo */}
           <div className="flex flex-col items-center lg:items-start">
-            <Link to="/" className="inline-flex no-underline" aria-label="Aira Crest — Home">
+            <Link
+              to="/"
+              className="inline-flex no-underline"
+              aria-label="Aira Crest — Home"
+            >
               <img
-                src="/fulllogo.webp"
+                src="/fulllogonew.webp"
                 alt="Aira Crest"
                 className="h-24 w-auto object-contain sm:h-28"
               />
@@ -136,7 +140,10 @@ const Footer = () => {
           <p className="text-cream-200/70">
             © {year} Aira Crest Private Limited. All rights reserved.
           </p>
-          <span className="hidden text-cream-300/30 sm:inline" aria-hidden="true">
+          <span
+            className="hidden text-cream-300/30 sm:inline"
+            aria-hidden="true"
+          >
             |
           </span>
           <p className="text-cream-200/60">

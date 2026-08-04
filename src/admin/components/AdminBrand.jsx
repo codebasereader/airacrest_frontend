@@ -8,7 +8,7 @@ const AdminBrand = ({ className = "" }) => (
     aria-label="Aira Crest Admin — Categories"
   >
     <img
-      src="/fulllogo.webp"
+      src="/fulllogonew.webp"
       alt="Aira Crest"
       className="h-9 w-auto object-contain sm:h-10"
     />

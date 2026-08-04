@@ -45,7 +45,7 @@ const App = () => {
     <>
       <AuthHandler />
       <ScrollToHash />
-      <ChatBot />
+      {/* <ChatBot /> */}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<ProductsPage />} />

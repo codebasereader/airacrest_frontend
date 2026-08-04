@@ -41,7 +41,7 @@ const LoginPage = () => {
             aria-label="Aira Crest — Home"
           >
             <img
-              src="/fulllogo.webp"
+              src="/fulllogonew.webp"
               alt="Aira Crest"
               className="h-14 w-auto object-contain sm:h-16"
             />
