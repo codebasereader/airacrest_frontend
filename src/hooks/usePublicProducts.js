@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import * as productsApi from "../api/productsApi";
 import { ApiError } from "../api/client";
 import { normalizeLoadMoreResponse } from "../api/loadMore";
-import { sortProductsByOrder } from "../utils/productUtils";
+import { isMongoObjectId, sortProductsByOrder } from "../utils/productUtils";
 
 export const usePublicProducts = (filters = {}) => {
   const { category, subcategory, featured, search } = filters;
@@ -44,15 +44,17 @@ export const usePublicProducts = (filters = {}) => {
   return { products, loading, error, refetch: fetchProducts };
 };
 
-export const usePublicProduct = (id) => {
+export const usePublicProduct = (slugOrId) => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [resolvedViaId, setResolvedViaId] = useState(false);
 
   useEffect(() => {
-    if (!id) {
+    if (!slugOrId) {
       setProduct(null);
       setLoading(false);
+      setResolvedViaId(false);
       return undefined;
     }
 
@@ -61,10 +63,23 @@ export const usePublicProduct = (id) => {
     const loadProduct = async () => {
       setLoading(true);
       setError(null);
+      setResolvedViaId(false);
 
       try {
-        const data = await productsApi.getPublicProduct(id);
-        if (!cancelled) setProduct(data ?? null);
+        let data;
+        let viaId = false;
+
+        if (isMongoObjectId(slugOrId)) {
+          data = await productsApi.getPublicProduct(slugOrId);
+          viaId = true;
+        } else {
+          data = await productsApi.getPublicProductBySlug(slugOrId);
+        }
+
+        if (!cancelled) {
+          setProduct(data ?? null);
+          setResolvedViaId(viaId);
+        }
       } catch (err) {
         if (!cancelled) {
           setError(
@@ -73,6 +88,7 @@ export const usePublicProduct = (id) => {
               : "Failed to load product. Please try again.",
           );
           setProduct(null);
+          setResolvedViaId(false);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -84,7 +100,7 @@ export const usePublicProduct = (id) => {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [slugOrId]);
 
-  return { product, loading, error };
+  return { product, loading, error, resolvedViaId };
 };

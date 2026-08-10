@@ -35,6 +35,9 @@ export const listPublicProducts = (filters) =>
 export const getPublicProduct = (id) =>
   apiRequest(`products/${id}`, { method: "GET" });
 
+export const getPublicProductBySlug = (slug) =>
+  apiRequest(`products/slug/${encodeURIComponent(slug)}`, { method: "GET" });
+
 export const listProducts = (filters) =>
   apiRequest(buildListPath(filters), { method: "GET" });
 

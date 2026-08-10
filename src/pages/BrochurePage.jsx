@@ -23,14 +23,14 @@ const BrochurePage = () => {
       <main className="px-4 py-12 sm:px-6 sm:py-16 lg:px-10 lg:py-20">
         <div className="mx-auto max-w-lg text-center">
           <p className="font-script text-2xl text-maroon-600 sm:text-3xl">
-            Company Brochure
+            Product Catalogue
           </p>
           <h1 className="mt-2 font-heading text-2xl font-bold tracking-[0.1em] text-maroon-900 sm:text-3xl">
             AIRA CREST
           </h1>
           <p className="mt-4 font-sans text-sm leading-relaxed text-maroon-700 sm:text-base">
-            Opening brochure… If it doesn&apos;t start automatically, scan the QR
-            code or use the download button below.
+            Opening product catalogue… If it doesn&apos;t start automatically,
+            scan the QR code or use the download button below.
           </p>
 
           <div className="mt-8 flex flex-col items-center gap-6">

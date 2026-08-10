@@ -7,11 +7,11 @@ import { BROCHURE_PDF_NAME, BROCHURE_PDF_URL } from "../constants/brochure";
 
 const VARIANTS = {
   headerDesktop:
-    "hidden xl:inline-flex items-center gap-2 rounded-sm border border-gold-400/45 bg-transparent px-4 py-2.5 font-sans text-[10px] font-bold tracking-[0.16em] text-cream-100 no-underline transition-colors hover:border-gold-400 hover:bg-gold-400/10 hover:text-gold-400",
+    "hidden xl:inline-flex items-center gap-2 rounded-sm border border-gold-400/45 bg-transparent px-3.5 py-2.5 font-sans text-[10px] font-bold tracking-[0.12em] text-cream-100 no-underline transition-colors hover:border-gold-400 hover:bg-gold-400/10 hover:text-gold-400",
   headerMobile:
-    "inline-flex xl:hidden items-center gap-1.5 rounded-sm border border-gold-400/40 bg-transparent px-2.5 py-2 font-sans text-[9px] font-bold tracking-[0.12em] text-cream-100 no-underline transition-colors hover:border-gold-400 hover:text-gold-400 sm:gap-2 sm:px-3 sm:py-2.5 sm:text-[10px] sm:tracking-[0.14em]",
+    "inline-flex xl:hidden items-center gap-1.5 rounded-sm border border-gold-400/40 bg-transparent px-2.5 py-2 font-sans text-[9px] font-bold tracking-[0.1em] text-cream-100 no-underline transition-colors hover:border-gold-400 hover:text-gold-400 sm:gap-2 sm:px-3 sm:py-2.5 sm:text-[10px] sm:tracking-[0.12em]",
   enquire:
-    "inline-flex w-full items-center justify-center gap-2 rounded-sm border border-maroon-700 bg-white px-8 py-3.5 font-sans text-[11px] font-semibold tracking-[0.18em] text-maroon-900 no-underline transition-colors duration-200 hover:border-maroon-900 hover:bg-maroon-50 sm:w-auto sm:px-10",
+    "inline-flex w-full items-center justify-center gap-2 rounded-sm border border-maroon-700 bg-white px-8 py-3.5 font-sans text-[11px] font-semibold tracking-[0.14em] text-maroon-900 no-underline transition-colors duration-200 hover:border-maroon-900 hover:bg-maroon-50 sm:w-auto sm:px-10",
 };
 
 const DownloadBrochureButton = ({ variant = "enquire", className = "" }) => {
@@ -29,10 +29,10 @@ const DownloadBrochureButton = ({ variant = "enquire", className = "" }) => {
         aria-hidden="true"
       />
       <span className={variant === "headerMobile" ? "max-[380px]:hidden" : ""}>
-        DOWNLOAD BROCHURE
+        DOWNLOAD PRODUCT CATALOGUE
       </span>
       {variant === "headerMobile" && (
-        <span className="hidden max-[380px]:inline">BROCHURE</span>
+        <span className="hidden max-[380px]:inline">CATALOGUE</span>
       )}
     </>
   );

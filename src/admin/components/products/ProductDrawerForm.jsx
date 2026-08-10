@@ -2,7 +2,9 @@ import React, { useEffect, useId, useMemo, useState } from "react";
 import { useMultipleImageUpload } from "../../hooks/useMultipleImageUpload";
 import {
   EMPTY_PRODUCT_FORM,
+  createFaqRow,
   createSpecificationRow,
+  findDuplicateFaqQuestions,
   toProductFormState,
   toProductPayload,
 } from "../../utils/productForm";
@@ -15,6 +17,7 @@ import AdminAlert from "../shared/AdminAlert";
 import CatalogSelectField from "../shared/CatalogSelectField";
 import ProductImagesField from "./ProductImagesField";
 import ProductSpecificationsEditor from "./ProductSpecificationsEditor";
+import ProductFaqsEditor from "./ProductFaqsEditor";
 import CreateCategoryModal from "./CreateCategoryModal";
 import CreateSubcategoryModal from "./CreateSubcategoryModal";
 
@@ -145,6 +148,43 @@ const ProductDrawerForm = ({
     });
   };
 
+  const handleFaqChange = (index, field, value) => {
+    setForm((prev) => ({
+      ...prev,
+      faqs: prev.faqs.map((faq, faqIndex) =>
+        faqIndex === index ? { ...faq, [field]: value } : faq,
+      ),
+    }));
+  };
+
+  const handleAddFaq = () => {
+    setForm((prev) => ({
+      ...prev,
+      faqs: [...prev.faqs, createFaqRow()],
+    }));
+  };
+
+  const handleRemoveFaq = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      faqs: prev.faqs.filter((_, faqIndex) => faqIndex !== index),
+    }));
+  };
+
+  const handleReorderFaq = (fromIndex, toIndex) => {
+    setForm((prev) => {
+      const faqs = [...prev.faqs];
+      const [moved] = faqs.splice(fromIndex, 1);
+      faqs.splice(toIndex, 0, moved);
+      return { ...prev, faqs };
+    });
+  };
+
+  const duplicateFaqIndexes = useMemo(
+    () => findDuplicateFaqQuestions(form.faqs),
+    [form.faqs],
+  );
+
   const handleFileSelect = async (files) => {
     try {
       await uploadFiles(files);
@@ -161,6 +201,13 @@ const ProductDrawerForm = ({
 
     if (!form.category || !form.subcategory) {
       setSubmitError("Category and subcategory are required.");
+      return;
+    }
+
+    if (duplicateFaqIndexes.length > 0) {
+      setSubmitError(
+        "Duplicate FAQ questions are not allowed on the same product.",
+      );
       return;
     }
 
@@ -320,6 +367,16 @@ const ProductDrawerForm = ({
         onAdd={handleAddSpec}
         onRemove={handleRemoveSpec}
         onReorder={handleReorderSpec}
+      />
+
+      <ProductFaqsEditor
+        faqs={form.faqs}
+        disabled={isDisabled}
+        duplicateIndexes={duplicateFaqIndexes}
+        onChange={handleFaqChange}
+        onAdd={handleAddFaq}
+        onRemove={handleRemoveFaq}
+        onReorder={handleReorderFaq}
       />
 
       <div className="grid gap-4 sm:grid-cols-2">

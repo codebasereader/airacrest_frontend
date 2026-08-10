@@ -2,7 +2,8 @@ import React from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { usePublicBlog } from "../hooks/usePublicBlogs";
+import { usePublicBlog, usePublicBlogs } from "../hooks/usePublicBlogs";
+import { areBlogsPubliclyVisible } from "../constants/blogs";
 import { formatBlogDate, getBlogCoverUrl } from "../admin/utils/blogForm";
 
 const BlogDetailSkeleton = () => (
@@ -22,6 +23,13 @@ const BlogDetailSkeleton = () => (
 const BlogDetailPage = () => {
   const { slug } = useParams();
   const { blog, loading, error } = usePublicBlog(slug);
+  const { blogs, loading: blogsLoading } = usePublicBlogs();
+  const blogsListingVisible =
+    !blogsLoading && areBlogsPubliclyVisible(blogs);
+  const articlesHref = blogsListingVisible ? "/blogs" : "/";
+  const articlesLabel = blogsListingVisible
+    ? "← ALL ARTICLES"
+    : "← BACK TO HOME";
 
   if (loading) {
     return (
@@ -36,7 +44,7 @@ const BlogDetailPage = () => {
   }
 
   if (!blog || error) {
-    return <Navigate to="/blogs" replace />;
+    return <Navigate to="/" replace />;
   }
 
   const coverUrl = getBlogCoverUrl(blog);
@@ -54,10 +62,10 @@ const BlogDetailPage = () => {
         <article className="relative mx-auto max-w-[760px]">
           <nav aria-label="Breadcrumb">
             <Link
-              to="/blogs"
+              to={articlesHref}
               className="inline-flex items-center gap-1.5 font-sans text-[11px] font-semibold tracking-[0.12em] text-maroon-600 no-underline transition-colors hover:text-maroon-900"
             >
-              ← ALL ARTICLES
+              {articlesLabel}
             </Link>
           </nav>
 
@@ -116,10 +124,10 @@ const BlogDetailPage = () => {
 
           <footer className="mt-14 border-t border-maroon-200/40 pt-8">
             <Link
-              to="/blogs"
+              to={articlesHref}
               className="inline-flex items-center gap-2 font-sans text-[11px] font-semibold tracking-[0.14em] text-gold-600 no-underline transition-colors hover:text-gold-700"
             >
-              ← BACK TO ALL ARTICLES
+              {blogsListingVisible ? "← BACK TO ALL ARTICLES" : "← BACK TO HOME"}
             </Link>
           </footer>
         </article>

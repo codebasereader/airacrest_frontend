@@ -33,6 +33,9 @@ const ProductViewDrawer = ({
   const specifications = (product.specifications || []).filter(
     (spec) => spec?.label && spec?.value,
   );
+  const faqs = (product.faqs || []).filter(
+    (faq) => faq?.question?.trim() && faq?.answer?.trim(),
+  );
 
   return (
     <AdminDrawer
@@ -113,7 +116,7 @@ const ProductViewDrawer = ({
           </div>
         )}
 
-        {specifications.length > 0 && (
+          {specifications.length > 0 && (
           <div>
             <h3 className="font-sans text-[10px] font-semibold tracking-[0.12em] text-maroon-500 uppercase">
               Specifications
@@ -125,6 +128,29 @@ const ProductViewDrawer = ({
                 </DetailRow>
               ))}
             </dl>
+          </div>
+        )}
+
+        {faqs.length > 0 && (
+          <div>
+            <h3 className="font-sans text-[10px] font-semibold tracking-[0.12em] text-maroon-500 uppercase">
+              FAQs ({faqs.length})
+            </h3>
+            <div className="mt-2 space-y-2">
+              {faqs.map((faq, index) => (
+                <div
+                  key={faq._id || faq.id || `${faq.question}-${index}`}
+                  className="rounded-xl border border-maroon-100 bg-white px-4 py-3"
+                >
+                  <p className="font-sans text-sm font-semibold text-maroon-900">
+                    {toBritishSpelling(faq.question)}
+                  </p>
+                  <p className="mt-1.5 font-sans text-sm leading-relaxed text-maroon-700">
+                    {toBritishSpelling(faq.answer)}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

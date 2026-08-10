@@ -2,11 +2,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 import ProductImageCarousel from "./ProductImageCarousel";
 import { toBritishSpelling } from "../utils/britishSpelling";
+import { getProductPath } from "../utils/productUtils";
 
 const ProductCard = ({ product, className = "" }) => {
   const highlights = product.highlights ?? [];
-  const productId = product._id ?? product.id;
   const productName = toBritishSpelling(product.name);
+  const productPath = getProductPath(product);
 
   return (
     <article
@@ -38,7 +39,7 @@ const ProductCard = ({ product, className = "" }) => {
 
         <div className="mt-5 flex justify-start">
           <Link
-            to={`/products/${productId}`}
+            to={productPath}
             className="inline-flex items-center gap-1.5 rounded-sm border border-maroon-700 px-3 py-1.5 font-sans text-[10px] font-semibold tracking-[0.14em] text-maroon-900 no-underline transition-colors duration-200 hover:border-maroon-900 hover:bg-maroon-50 sm:px-4 sm:py-2 sm:text-[11px]"
           >
             VIEW DETAILS

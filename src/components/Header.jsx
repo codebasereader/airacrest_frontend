@@ -18,16 +18,14 @@ import {
   scrollToTop,
 } from "../utils/scrollToSection";
 import DownloadBrochureButton from "./DownloadBrochureButton";
+import { usePublicBlogs } from "../hooks/usePublicBlogs";
+import { areBlogsPubliclyVisible } from "../constants/blogs";
 
 const NAV_ITEMS = [
   { label: "HOME", sectionId: "home" },
-
-  { label: "ABOUT US", sectionId: "about" },
-
   { label: "PRODUCTS", path: "/products" },
-
-  { label: "BLOGS", path: "/blogs" },
-
+  { label: "ABOUT US", sectionId: "about" },
+  { label: "BLOGS", path: "/blogs", requiresBlogs: true },
   { label: "CONTACT US", sectionId: "contact" },
 ];
 
@@ -75,6 +73,12 @@ const Header = () => {
   const [activeLink, setActiveLink] = useState("HOME");
 
   const prefersReducedMotion = useReducedMotion();
+
+  const { blogs, loading: blogsLoading } = usePublicBlogs();
+  const showBlogsNav = !blogsLoading && areBlogsPubliclyVisible(blogs);
+  const visibleNavItems = NAV_ITEMS.filter(
+    (item) => !item.requiresBlogs || showBlogsNav,
+  );
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -250,7 +254,7 @@ const Header = () => {
             animate="visible"
             variants={prefersReducedMotion ? undefined : stagger(0.05, 0.2)}
           >
-            {NAV_ITEMS.map((item) => (
+            {visibleNavItems.map((item) => (
               <NavLink
                 key={item.label}
                 label={item.label}
@@ -370,7 +374,7 @@ const Header = () => {
             animate={menuOpen ? "visible" : "hidden"}
             variants={prefersReducedMotion ? fadeUp : stagger(0.05, 0.04)}
           >
-            {NAV_ITEMS.map((item) => {
+            {visibleNavItems.map((item) => {
               const isActive = activeLink === item.label;
 
               return (

@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ProductBreadcrumb from "../components/product-detail/ProductBreadcrumb";
@@ -7,10 +7,13 @@ import ProductGallery from "../components/product-detail/ProductGallery";
 import ProductHero from "../components/product-detail/ProductHero";
 import SpecsTable from "../components/product-detail/SpecsTable";
 import ProductNote from "../components/product-detail/ProductNote";
+import ProductFaqPreview from "../components/product-detail/ProductFaqPreview";
+import TradingHouseNote from "../components/product-detail/TradingHouseNote";
 import ProductDetailActions from "../components/product-detail/ProductDetailActions";
 import RelatedBlogs from "../components/blogs/RelatedBlogs";
 import { usePublicProduct } from "../hooks/usePublicProducts";
 import { toBritishSpelling } from "../utils/britishSpelling";
+import { getProductPath, getVisibleFaqs } from "../utils/productUtils";
 
 const ProductDetailSkeleton = () => (
   <div className="relative mx-auto max-w-[1200px] animate-pulse">
@@ -27,8 +30,8 @@ const ProductDetailSkeleton = () => (
 );
 
 const ProductDetailPage = () => {
-  const { productId } = useParams();
-  const { product, loading, error } = usePublicProduct(productId);
+  const { slug } = useParams();
+  const { product, loading, error, resolvedViaId } = usePublicProduct(slug);
 
   if (loading) {
     return (
@@ -45,6 +48,12 @@ const ProductDetailPage = () => {
   if (!product || error) {
     return <Navigate to="/products" replace />;
   }
+
+  if (resolvedViaId && product.slug && product.slug !== slug) {
+    return <Navigate to={getProductPath(product)} replace />;
+  }
+
+  const hasFaqs = getVisibleFaqs(product.faqs).length > 0;
 
   return (
     <div className="min-h-screen bg-cream-100">
@@ -70,7 +79,9 @@ const ProductDetailPage = () => {
             />
             <div>
               <ProductHero product={product} />
-              <ProductDetailActions />
+              <ProductDetailActions
+                productName={toBritishSpelling(product.name)}
+              />
             </div>
           </div>
 
@@ -78,6 +89,10 @@ const ProductDetailPage = () => {
             <SpecsTable specifications={product.specifications} />
             <ProductNote note={product.note} />
           </div>
+
+          <ProductFaqPreview product={product} faqs={product.faqs} />
+
+          {hasFaqs && <TradingHouseNote />}
 
           <RelatedBlogs productId={product._id} />
         </div>

@@ -44,10 +44,10 @@ const BrochureQR = ({ variant = "card" }) => {
     >
       <div className="flex flex-col items-center text-center">
         <p className="font-heading text-xs font-bold tracking-[0.14em] text-maroon-900 sm:text-sm">
-          SCAN TO VIEW BROCHURE
+          SCAN TO VIEW PRODUCT CATALOGUE
         </p>
         <p className="mt-1.5 font-sans text-[11px] text-maroon-600 sm:text-xs">
-          Scan the QR code to open our company brochure
+          Scan the QR code to open our product catalogue
         </p>
 
         <div className="mt-5 rounded-xl border border-cream-300/80 bg-cream-50 p-4">
@@ -58,7 +58,7 @@ const BrochureQR = ({ variant = "card" }) => {
             marginSize={2}
             bgColor="#faf7f2"
             fgColor="#5c1a22"
-            aria-label="QR code linking to Aira Crest brochure"
+            aria-label="QR code linking to Aira Crest product catalogue"
           />
         </div>
 
@@ -71,7 +71,7 @@ const BrochureQR = ({ variant = "card" }) => {
               strokeWidth={1.5}
               aria-hidden="true"
             />
-            Brochure link
+            Catalogue link
           </p>
           <a
             href={brochureUrl}
@@ -103,7 +103,7 @@ const BrochureQR = ({ variant = "card" }) => {
           rel="noopener noreferrer"
           className="mt-4 font-sans text-[11px] font-medium text-gold-600 no-underline transition-colors hover:text-gold-500"
         >
-          Open brochure directly →
+          Open product catalogue directly →
         </a>
       </div>
     </div>

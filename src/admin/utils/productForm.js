@@ -13,13 +13,13 @@ export const DEFAULT_PRODUCT_SPEC_LABELS = [
   "MOQ",
 ];
 
-const createSpecId = () =>
+const createRowId = (prefix = "row") =>
   typeof crypto !== "undefined" && crypto.randomUUID
     ? crypto.randomUUID()
-    : `spec-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    : `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 export const createSpecificationRow = (label = "", value = "") => ({
-  id: createSpecId(),
+  id: createRowId("spec"),
   label,
   value,
 });
@@ -28,10 +28,44 @@ export const createDefaultSpecifications = () =>
   DEFAULT_PRODUCT_SPEC_LABELS.map((label) => createSpecificationRow(label, ""));
 
 export const normalizeSpecificationRow = (spec) => ({
-  id: spec?.id || createSpecId(),
+  id: spec?.id || createRowId("spec"),
   label: spec?.label ?? "",
   value: spec?.value ?? "",
 });
+
+export const createFaqRow = (question = "", answer = "") => ({
+  id: createRowId("faq"),
+  question,
+  answer,
+});
+
+export const normalizeFaqRow = (faq) => ({
+  id: faq?.id || faq?._id || createRowId("faq"),
+  question: faq?.question ?? "",
+  answer: faq?.answer ?? "",
+});
+
+export const normalizeFaqQuestionKey = (question) =>
+  question.trim().toLowerCase().replace(/\s+/g, " ");
+
+export const findDuplicateFaqQuestions = (faqs) => {
+  const seen = new Map();
+  const duplicates = new Set();
+
+  faqs.forEach((faq, index) => {
+    const key = normalizeFaqQuestionKey(faq.question || "");
+    if (!key) return;
+
+    if (seen.has(key)) {
+      duplicates.add(index);
+      duplicates.add(seen.get(key));
+    } else {
+      seen.set(key, index);
+    }
+  });
+
+  return [...duplicates].sort((a, b) => a - b);
+};
 
 export const EMPTY_PRODUCT_FORM = {
   name: "",
@@ -41,6 +75,7 @@ export const EMPTY_PRODUCT_FORM = {
   highlights: "",
   note: "",
   specifications: createDefaultSpecifications(),
+  faqs: [],
   isFeatured: false,
   isActive: true,
   sortOrder: 0,
@@ -61,6 +96,9 @@ export const toProductFormState = (product) => ({
     product?.specifications?.length > 0
       ? product.specifications.map(normalizeSpecificationRow)
       : createDefaultSpecifications(),
+  faqs: Array.isArray(product?.faqs)
+    ? product.faqs.map(normalizeFaqRow)
+    : [],
   isFeatured: product?.isFeatured ?? false,
   isActive: product?.isActive ?? true,
   sortOrder: product?.sortOrder ?? 0,
@@ -79,6 +117,13 @@ export const toProductPayload = (form, imageKeys) => {
     }))
     .filter((spec) => spec.label && spec.value);
 
+  const faqs = form.faqs
+    .map((faq) => ({
+      question: faq.question.trim(),
+      answer: faq.answer.trim(),
+    }))
+    .filter((faq) => faq.question && faq.answer);
+
   const payload = {
     name: form.name.trim(),
     category: form.category,
@@ -87,6 +132,7 @@ export const toProductPayload = (form, imageKeys) => {
     highlights,
     note: form.note.trim() || null,
     specifications,
+    faqs,
     isFeatured: form.isFeatured,
     isActive: form.isActive,
     sortOrder: Number(form.sortOrder) || 0,

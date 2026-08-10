@@ -1,9 +1,11 @@
 import React from "react";
+import { Navigate } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import PublicBlogCard from "../components/blogs/PublicBlogCard";
 import { usePublicBlogs } from "../hooks/usePublicBlogs";
+import { areBlogsPubliclyVisible } from "../constants/blogs";
 import { LineReveal, LineRevealGroup } from "../motion/LineReveal";
 import { stagger } from "../motion/presets";
 
@@ -29,6 +31,10 @@ const BlogGridSkeleton = () => (
 const BlogsPage = () => {
   const prefersReducedMotion = useReducedMotion();
   const { blogs, loading, error } = usePublicBlogs();
+
+  if (!loading && !areBlogsPubliclyVisible(blogs)) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-cream-100">
@@ -85,7 +91,7 @@ const BlogsPage = () => {
             </p>
           )}
 
-          {!loading && !error && blogs.length > 0 && (
+          {!loading && !error && areBlogsPubliclyVisible(blogs) && (
             <motion.div
               className="mt-12 grid grid-cols-1 gap-8 lg:mt-16 lg:grid-cols-2"
               initial="hidden"
@@ -96,12 +102,6 @@ const BlogsPage = () => {
                 <PublicBlogCard key={blog._id} blog={blog} index={index} />
               ))}
             </motion.div>
-          )}
-
-          {!loading && !error && blogs.length === 0 && (
-            <p className="mt-12 text-center font-sans text-sm text-maroon-600">
-              No articles published yet. Check back soon.
-            </p>
           )}
         </div>
       </main>
