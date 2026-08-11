@@ -25,7 +25,7 @@ export const COMPANY_REGISTRATIONS = [
  * Never set a placeholder — icons only render when a real URL is present.
  */
 export const SOCIAL_LINKS = {
-  linkedin: "",
+  linkedin: "https://www.linkedin.com/company/airacrest",
   whatsapp: `https://wa.me/${COMPANY.whatsappE164}`,
   instagram: "",
   facebook: "",
