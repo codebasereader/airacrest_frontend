@@ -7,6 +7,7 @@ frontend:
         - nvm use 22
         - node -v
         - npm ci
+        - npx playwright install chromium
     build:
       commands:
         - npm run build
@@ -17,3 +18,4 @@ frontend:
   cache:
     paths:
       - node_modules/**/*
+      - /root/.cache/ms-playwright/**/*

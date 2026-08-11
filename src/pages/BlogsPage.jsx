@@ -1,8 +1,11 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { motion, useReducedMotion } from "motion/react";
+import {motion} from "motion/react";
+import { useStaticMotion } from "../motion/useStaticMotion";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import SeoHead from "../components/SeoHead";
+import PrerenderReady from "../components/PrerenderReady";
 import PublicBlogCard from "../components/blogs/PublicBlogCard";
 import { usePublicBlogs } from "../hooks/usePublicBlogs";
 import { areBlogsPubliclyVisible } from "../constants/blogs";
@@ -29,7 +32,7 @@ const BlogGridSkeleton = () => (
 );
 
 const BlogsPage = () => {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
   const { blogs, loading, error } = usePublicBlogs();
 
   if (!loading && !areBlogsPubliclyVisible(blogs)) {
@@ -38,6 +41,12 @@ const BlogsPage = () => {
 
   return (
     <div className="min-h-screen bg-cream-100">
+      <SeoHead
+        title="Insights & Articles"
+        path="/blogs"
+        description="Export guides, sourcing insights, and product knowledge from Aira Crest — helping global buyers make informed decisions about Indian dehydrated foods and spices."
+      />
+      <PrerenderReady ready={!loading && areBlogsPubliclyVisible(blogs)} />
       <Header />
 
       <main className="relative overflow-hidden px-4 py-14 sm:px-6 sm:py-16 lg:px-10 lg:py-20">

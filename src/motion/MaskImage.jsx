@@ -1,5 +1,6 @@
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { maskReveal } from "./reveal";
+import { useStaticMotion } from "./useStaticMotion";
 
 /**
  * Image revealed via horizontal clip-path mask (0% → 100%).
@@ -15,7 +16,7 @@ const MaskImage = ({
   delay = 0.2,
   blend = true,
 }) => {
-  const prefersReducedMotion = useReducedMotion();
+  const staticMotion = useStaticMotion();
 
   const inner = (
     <div className="absolute inset-0">
@@ -24,15 +25,13 @@ const MaskImage = ({
         alt={alt}
         className={`h-full w-full object-cover object-right ${imageClassName}`}
       />
-      {blend && (
-        <div className={blendClassName} aria-hidden="true" />
-      )}
+      {blend && <div className={blendClassName} aria-hidden="true" />}
     </div>
   );
 
   const baseClassName = `relative shrink-0 self-stretch overflow-hidden bg-header h-[320px] sm:h-[400px] lg:h-auto ${className}`;
 
-  if (prefersReducedMotion) {
+  if (staticMotion) {
     return <div className={baseClassName}>{inner}</div>;
   }
 

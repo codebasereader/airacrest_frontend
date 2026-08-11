@@ -1,4 +1,27 @@
+# Amplify Hosting redirects / rewrites
+# Order matters: specific rules first, SPA fallback last.
+
 redirects:
+  # Serve Search Console verification + SEO files as-is (never rewrite to index.html)
+  - source: "/google775ce10030c74b40.html"
+    target: "/google775ce10030c74b40.html"
+    status: "200"
+  - source: "/robots.txt"
+    target: "/robots.txt"
+    status: "200"
+  - source: "/sitemap.xml"
+    target: "/sitemap.xml"
+    status: "200"
+
+  # Force apex → www for all paths
+  - source: "https://airacrest.com"
+    status: "301"
+    target: "https://www.airacrest.com"
+  - source: "https://airacrest.com/<*>"
+    status: "301"
+    target: "https://www.airacrest.com/<*>"
+
+  # SPA fallback for routes without a static file
   - source: "/<*>"
     target: "/index.html"
     status: "404-200"

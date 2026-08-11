@@ -2,9 +2,12 @@ import React from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import SeoHead from "../components/SeoHead";
+import PrerenderReady from "../components/PrerenderReady";
 import { usePublicBlog, usePublicBlogs } from "../hooks/usePublicBlogs";
 import { areBlogsPubliclyVisible } from "../constants/blogs";
 import { formatBlogDate, getBlogCoverUrl } from "../admin/utils/blogForm";
+import { absoluteUrl } from "../constants/seo";
 
 const BlogDetailSkeleton = () => (
   <div className="mx-auto max-w-[760px] animate-pulse">
@@ -48,9 +51,29 @@ const BlogDetailPage = () => {
   }
 
   const coverUrl = getBlogCoverUrl(blog);
+  const blogPath = `/blogs/${blog.slug || slug}`;
 
   return (
     <div className="min-h-screen bg-cream-100">
+      <SeoHead
+        title={blog.title}
+        path={blogPath}
+        description={blog.excerpt || blog.title}
+        image={coverUrl || undefined}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          headline: blog.title,
+          description: blog.excerpt || blog.title,
+          image: coverUrl || undefined,
+          datePublished: blog.publishedAt,
+          author: blog.author
+            ? { "@type": "Person", name: blog.author }
+            : undefined,
+          url: absoluteUrl(blogPath),
+        }}
+      />
+      <PrerenderReady ready />
       <Header />
 
       <main className="relative overflow-hidden px-4 py-10 sm:px-6 sm:py-12 lg:px-10 lg:py-16">

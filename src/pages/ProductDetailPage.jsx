@@ -2,6 +2,8 @@ import React from "react";
 import { Navigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import SeoHead from "../components/SeoHead";
+import PrerenderReady from "../components/PrerenderReady";
 import ProductBreadcrumb from "../components/product-detail/ProductBreadcrumb";
 import ProductGallery from "../components/product-detail/ProductGallery";
 import ProductHero from "../components/product-detail/ProductHero";
@@ -12,8 +14,15 @@ import TradingHouseNote from "../components/product-detail/TradingHouseNote";
 import ProductDetailActions from "../components/product-detail/ProductDetailActions";
 import RelatedBlogs from "../components/blogs/RelatedBlogs";
 import { usePublicProduct } from "../hooks/usePublicProducts";
+import { useSetWhatsAppSource } from "../hooks/useSetWhatsAppSource";
+import { formatProductWhatsAppTag } from "../utils/whatsapp";
 import { toBritishSpelling } from "../utils/britishSpelling";
-import { getProductPath, getVisibleFaqs } from "../utils/productUtils";
+import {
+  getProductPath,
+  getProductPrimaryImage,
+  getVisibleFaqs,
+} from "../utils/productUtils";
+import { absoluteUrl } from "../constants/seo";
 
 const ProductDetailSkeleton = () => (
   <div className="relative mx-auto max-w-[1200px] animate-pulse">
@@ -32,6 +41,11 @@ const ProductDetailSkeleton = () => (
 const ProductDetailPage = () => {
   const { slug } = useParams();
   const { product, loading, error, resolvedViaId } = usePublicProduct(slug);
+  const whatsAppSourceTag = product
+    ? formatProductWhatsAppTag(toBritishSpelling(product.name))
+    : null;
+
+  useSetWhatsAppSource(whatsAppSourceTag);
 
   if (loading) {
     return (
@@ -54,9 +68,28 @@ const ProductDetailPage = () => {
   }
 
   const hasFaqs = getVisibleFaqs(product.faqs).length > 0;
+  const productName = toBritishSpelling(product.name);
+  const productPath = getProductPath(product);
+  const productImage = getProductPrimaryImage(product.images);
 
   return (
     <div className="min-h-screen bg-cream-100">
+      <SeoHead
+        title={productName}
+        path={productPath}
+        description={toBritishSpelling(product.description)}
+        image={productImage || undefined}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: productName,
+          description: toBritishSpelling(product.description),
+          image: productImage || undefined,
+          url: absoluteUrl(productPath),
+          brand: { "@type": "Brand", name: "Aira Crest" },
+        }}
+      />
+      <PrerenderReady ready />
       <Header />
 
       <main className="relative overflow-hidden px-4 py-10 sm:px-6 sm:py-12 lg:px-10 lg:py-16">
@@ -80,7 +113,9 @@ const ProductDetailPage = () => {
             <div>
               <ProductHero product={product} />
               <ProductDetailActions
-                productName={toBritishSpelling(product.name)}
+                productName={formatProductWhatsAppTag(
+                  toBritishSpelling(product.name),
+                )}
               />
             </div>
           </div>

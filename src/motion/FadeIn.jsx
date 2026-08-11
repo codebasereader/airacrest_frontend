@@ -1,5 +1,6 @@
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { fadeUp, motionSafe, transitions } from "./presets";
+import { useStaticMotion } from "./useStaticMotion";
 
 const MOTION_TAGS = {
   div: motion.div,
@@ -29,15 +30,19 @@ const FadeIn = ({
   variant = fadeUp,
   ...props
 }) => {
-  const prefersReducedMotion = useReducedMotion();
+  const staticMotion = useStaticMotion();
   const Component = MOTION_TAGS[as] ?? motion.div;
 
-  const safe = motionSafe(prefersReducedMotion, {
+  const safe = motionSafe(staticMotion, {
     initial: "hidden",
     whileInView: "visible",
     viewport: { once, amount },
     variants: variant,
-    transition: { ...transitions.base, duration: duration ?? transitions.base.duration, delay },
+    transition: {
+      ...transitions.base,
+      duration: duration ?? transitions.base.duration,
+      delay,
+    },
     ...props,
   });
 

@@ -1,5 +1,6 @@
 import React from "react";
-import { motion, useReducedMotion } from "motion/react";
+import {motion} from "motion/react";
+import { useStaticMotion } from "../motion/useStaticMotion";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Download01Icon } from "@hugeicons/core-free-icons";
 import { transitions } from "../motion/presets";
@@ -15,7 +16,7 @@ const VARIANTS = {
 };
 
 const DownloadBrochureButton = ({ variant = "enquire", className = "" }) => {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
   const isHeader = variant === "headerDesktop" || variant === "headerMobile";
 
   const label = (

@@ -15,6 +15,20 @@ export const buildWhatsAppMessage = (sourceTag) => {
   return `Enquiry from airacrest.com | ${tag}`;
 };
 
+/** Readable product name for WhatsApp source tags (title-cases ALL CAPS names). */
+export const formatProductWhatsAppTag = (name) => {
+  const text = String(name || "").trim();
+  if (!text) return "";
+
+  if (text === text.toUpperCase() && /[A-Z]/.test(text)) {
+    return text
+      .toLowerCase()
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  return text;
+};
+
 /**
  * https://wa.me/{number}?text={urlencoded message with per-page source tag}
  */

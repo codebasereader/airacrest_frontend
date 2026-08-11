@@ -1,11 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion, useReducedMotion } from "motion/react";
+import {motion} from "motion/react";
+import { useStaticMotion } from "../../motion/useStaticMotion";
 import { formatBlogDate, getBlogCoverUrl } from "../../admin/utils/blogForm";
 import { fadeUp } from "../../motion/presets";
 
 const PublicBlogCard = ({ blog, index = 0 }) => {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
   const coverUrl = getBlogCoverUrl(blog);
 
   return (

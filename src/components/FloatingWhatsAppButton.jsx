@@ -2,6 +2,7 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { WhatsappIcon } from "@hugeicons/core-free-icons";
+import { useWhatsAppSource } from "../context/WhatsAppSourceContext";
 import {
   getWhatsAppEnquiryUrl,
   getWhatsAppSourceFromPath,
@@ -13,6 +14,7 @@ import {
  */
 const FloatingWhatsAppButton = ({ sourceTag } = {}) => {
   const { pathname } = useLocation();
+  const whatsAppSource = useWhatsAppSource();
 
   const hideOnRoute =
     pathname === "/login" || pathname.startsWith("/admin");
@@ -21,7 +23,10 @@ const FloatingWhatsAppButton = ({ sourceTag } = {}) => {
     return null;
   }
 
-  const tag = sourceTag || getWhatsAppSourceFromPath(pathname);
+  const tag =
+    sourceTag ||
+    whatsAppSource?.override ||
+    getWhatsAppSourceFromPath(pathname);
   const href = getWhatsAppEnquiryUrl(tag);
 
   return (

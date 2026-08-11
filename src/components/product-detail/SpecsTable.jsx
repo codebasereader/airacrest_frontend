@@ -1,5 +1,6 @@
 import React from "react";
-import { motion, useReducedMotion } from "motion/react";
+import {motion} from "motion/react";
+import { useStaticMotion } from "../../motion/useStaticMotion";
 import { fadeUp, stagger } from "../../motion/presets";
 import { getVisibleSpecifications } from "../../utils/specifications";
 import { toBritishSpelling } from "../../utils/britishSpelling";
@@ -23,7 +24,7 @@ const SpecRow = ({ spec, index }) => (
 );
 
 const SpecsTable = ({ specifications }) => {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
   const visibleSpecs = getVisibleSpecifications(specifications);
 
   if (visibleSpecs.length === 0) {

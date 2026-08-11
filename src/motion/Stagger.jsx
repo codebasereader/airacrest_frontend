@@ -1,5 +1,6 @@
-import { motion, useReducedMotion } from "motion/react";
-import { fadeUp, motionSafe, stagger, transitions } from "./presets";
+import { motion } from "motion/react";
+import { fadeUp, motionSafe, stagger } from "./presets";
+import { useStaticMotion } from "./useStaticMotion";
 
 /**
  * Staggers child FadeIn / motion items — ideal for nav lists, feature grids, etc.
@@ -14,10 +15,10 @@ const Stagger = ({
   amount = 0.15,
   ...props
 }) => {
-  const prefersReducedMotion = useReducedMotion();
+  const staticMotion = useStaticMotion();
   const Component = motion[as] ?? motion.div;
 
-  const safe = motionSafe(prefersReducedMotion, {
+  const safe = motionSafe(staticMotion, {
     initial: "hidden",
     whileInView: "visible",
     viewport: { once, amount },

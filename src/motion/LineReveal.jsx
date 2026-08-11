@@ -1,6 +1,6 @@
-import { motion, useReducedMotion } from "motion/react";
-import { motionSafe, transitions } from "./presets";
+import { motion } from "motion/react";
 import { lineReveal, lineStagger } from "./reveal";
+import { useStaticMotion } from "./useStaticMotion";
 
 /**
  * Staggers child LineReveal items for sequential line-by-line text entrance.
@@ -13,9 +13,9 @@ const LineRevealGroup = ({
   gap = 0.1,
   delay = 0.12,
 }) => {
-  const prefersReducedMotion = useReducedMotion();
+  const staticMotion = useStaticMotion();
 
-  if (prefersReducedMotion) {
+  if (staticMotion) {
     return <div className={className}>{children}</div>;
   }
 
@@ -46,10 +46,10 @@ const LineRevealGroup = ({
  * Single line of text revealed by sliding up from a clipped container.
  */
 const LineReveal = ({ children, className, as = "div" }) => {
-  const prefersReducedMotion = useReducedMotion();
+  const staticMotion = useStaticMotion();
   const Component = motion[as] ?? motion.div;
 
-  if (prefersReducedMotion) {
+  if (staticMotion) {
     return <div className={className}>{children}</div>;
   }
 

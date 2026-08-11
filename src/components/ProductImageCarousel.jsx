@@ -1,5 +1,5 @@
+import { useStaticMotion } from "../motion/useStaticMotion";
 import React, { useEffect, useState } from "react";
-import { useReducedMotion } from "motion/react";
 import { getProductImageUrls } from "../utils/productUtils";
 
 const ProductImageCarousel = ({
@@ -11,7 +11,7 @@ const ProductImageCarousel = ({
 }) => {
   const urls = getProductImageUrls(images);
   const [activeIndex, setActiveIndex] = useState(0);
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
 
   useEffect(() => {
     setActiveIndex(0);

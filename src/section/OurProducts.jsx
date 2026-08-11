@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion, useReducedMotion } from "motion/react";
+import {motion} from "motion/react";
+import { useStaticMotion } from "../motion/useStaticMotion";
 import ProductCard from "../components/ProductCard";
 import { usePublicProducts } from "../hooks/usePublicProducts";
 import { getCenteredProductGridClass } from "../utils/productUtils";
@@ -26,7 +27,7 @@ const ProductGridSkeleton = () => (
 );
 
 const OurProducts = () => {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
   const { products, loading, error } = usePublicProducts({ featured: true });
 
   return (
@@ -70,8 +71,8 @@ const OurProducts = () => {
         {!loading && !error && products.length > 0 && (
           <motion.div
             className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:mt-16 lg:grid-cols-6 lg:gap-8"
-            initial="hidden"
-            whileInView="visible"
+            initial={prefersReducedMotion ? false : "hidden"}
+            whileInView={prefersReducedMotion ? undefined : "visible"}
             viewport={{ once: true, amount: 0.1 }}
             variants={prefersReducedMotion ? fadeUp : stagger(0.08, 0.12)}
           >

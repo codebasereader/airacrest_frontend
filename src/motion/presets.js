@@ -57,6 +57,7 @@ export const motionSafe = (prefersReducedMotion, props) => {
   if (!prefersReducedMotion) return props;
 
   return {
+    ...props,
     initial: false,
     animate: { opacity: 1, x: 0, y: 0, scale: 1 },
     transition: transitions.instant,

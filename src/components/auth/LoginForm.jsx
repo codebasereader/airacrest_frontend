@@ -1,5 +1,6 @@
 import React, { useEffect, useId } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import {motion} from "motion/react";
+import { useStaticMotion } from "../../motion/useStaticMotion";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
   clearAuthError,
@@ -16,7 +17,7 @@ const LoginForm = ({ onSuccess }) => {
   const dispatch = useAppDispatch();
   const status = useAppSelector(selectAuthStatus);
   const error = useAppSelector(selectAuthError);
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
   const emailId = useId();
 
   const [email, setEmail] = React.useState("");

@@ -11,6 +11,29 @@
       rel="stylesheet"
     />
     <title>Aira Crest</title>
+    <script>
+      // Keep content visible for Googlebot / inspection tools (no opacity:0 flash).
+      (function () {
+        try {
+          if (
+            /googlebot|google-inspectiontool|chrome-lighthouse|bingbot|crawler|spider|bot\b/i.test(
+              navigator.userAgent,
+            )
+          ) {
+            document.documentElement.classList.add("seo-static");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      html.seo-static [style*="opacity"],
+      html.seo-static [style*="transform"],
+      html.seo-static [style*="clip-path"] {
+        opacity: 1 !important;
+        transform: none !important;
+        clip-path: none !important;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

@@ -6,7 +6,8 @@ import {
   MoneyBag02Icon,
   WindTurbineIcon,
 } from "@hugeicons/core-free-icons";
-import { motion, useReducedMotion } from "motion/react";
+import {motion} from "motion/react";
+import { useStaticMotion } from "../motion/useStaticMotion";
 import { LineReveal, LineRevealGroup } from "../motion/LineReveal";
 import { fadeUp, stagger } from "../motion/presets";
 import DownloadBrochureButton from "../components/DownloadBrochureButton";
@@ -139,7 +140,7 @@ const BenefitItem = ({ benefit }) => (
 );
 
 const Enquire = () => {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
   const [products, setProducts] = useState([]);
@@ -754,8 +755,8 @@ const Enquire = () => {
 
           <motion.div
             className="flex flex-col border-t border-maroon-200/40 pt-10 sm:pt-12 lg:border-t-0 lg:pt-16"
-            initial="hidden"
-            whileInView="visible"
+            initial={prefersReducedMotion ? false : "hidden"}
+            whileInView={prefersReducedMotion ? undefined : "visible"}
             viewport={{ once: true, amount: 0.2 }}
             variants={prefersReducedMotion ? fadeUp : stagger(0.1, 0.15)}
           >

@@ -2,13 +2,22 @@ import React from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import SeoHead from "../components/SeoHead";
+import PrerenderReady from "../components/PrerenderReady";
 import ProductFaqPreview from "../components/product-detail/ProductFaqPreview";
 import TradingHouseNote from "../components/product-detail/TradingHouseNote";
 import WhatsAppInlineButton from "../components/WhatsAppInlineButton";
 import { usePublicProduct } from "../hooks/usePublicProducts";
+import { useSetWhatsAppSource } from "../hooks/useSetWhatsAppSource";
 import { COMPANY } from "../constants/company";
+import { absoluteUrl } from "../constants/seo";
 import { toBritishSpelling } from "../utils/britishSpelling";
-import { getProductPath, getVisibleFaqs } from "../utils/productUtils";
+import {
+  getProductFaqPath,
+  getProductPath,
+  getVisibleFaqs,
+} from "../utils/productUtils";
+import { formatProductWhatsAppTag } from "../utils/whatsapp";
 
 const ProductFaqSkeleton = () => (
   <div className="mx-auto max-w-[900px] animate-pulse">
@@ -26,6 +35,11 @@ const ProductFaqSkeleton = () => (
 const ProductFaqPage = () => {
   const { slug } = useParams();
   const { product, loading, error, resolvedViaId } = usePublicProduct(slug);
+  const whatsAppSourceTag = product
+    ? formatProductWhatsAppTag(toBritishSpelling(product.name))
+    : null;
+
+  useSetWhatsAppSource(whatsAppSourceTag);
 
   if (loading) {
     return (
@@ -48,15 +62,37 @@ const ProductFaqPage = () => {
   }
 
   const productPath = getProductPath(product);
+  const faqPath = getProductFaqPath(product);
   const faqs = getVisibleFaqs(product.faqs);
-  const productName = toBritishSpelling(product.name);
+  const productName = formatProductWhatsAppTag(toBritishSpelling(product.name));
 
   if (faqs.length === 0) {
     return <Navigate to={productPath} replace />;
   }
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: toBritishSpelling(faq.question),
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: toBritishSpelling(faq.answer),
+      },
+    })),
+    url: absoluteUrl(faqPath),
+  };
+
   return (
     <div className="min-h-screen bg-cream-100">
+      <SeoHead
+        title={`${productName} FAQ`}
+        path={faqPath}
+        description={`Frequently asked questions about ${productName.toLowerCase()} from Aira Crest — quality, packaging, and export details.`}
+        jsonLd={faqJsonLd}
+      />
+      <PrerenderReady ready />
       <Header />
 
       <main className="relative overflow-hidden px-4 py-10 sm:px-6 sm:py-12 lg:px-10 lg:py-16">

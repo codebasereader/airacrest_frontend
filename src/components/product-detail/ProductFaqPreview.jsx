@@ -1,6 +1,7 @@
 import React, { useId, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, useReducedMotion } from "motion/react";
+import {motion} from "motion/react";
+import { useStaticMotion } from "../../motion/useStaticMotion";
 import { fadeUp, stagger } from "../../motion/presets";
 import { toBritishSpelling } from "../../utils/britishSpelling";
 import {
@@ -24,7 +25,8 @@ const FaqItem = ({ faq, index, open, onToggle }) => {
         aria-expanded={open}
         aria-controls={panelId}
         onClick={onToggle}
-        className="flex w-full items-start justify-between gap-4 px-5 py-4 text-left transition-colors duration-200 hover:bg-cream-100/80 sm:px-6 sm:py-5"
+        disabled={!onToggle}
+        className="flex w-full items-start justify-between gap-4 px-5 py-4 text-left transition-colors duration-200 hover:bg-cream-100/80 sm:px-6 sm:py-5 disabled:cursor-default"
       >
         <span className="font-sans text-sm font-semibold leading-snug text-maroon-900 sm:text-[0.95rem]">
           {toBritishSpelling(faq.question)}
@@ -38,13 +40,16 @@ const FaqItem = ({ faq, index, open, onToggle }) => {
           +
         </span>
       </button>
-      {open && (
-        <div id={panelId} className="px-5 pb-5 sm:px-6 sm:pb-6">
-          <p className="font-sans text-xs leading-relaxed text-maroon-800 sm:text-sm sm:leading-6">
-            {toBritishSpelling(faq.answer)}
-          </p>
-        </div>
-      )}
+      {/* Keep answers in the HTML for crawlers/prerender even when collapsed. */}
+      <div
+        id={panelId}
+        hidden={!open}
+        className="px-5 pb-5 sm:px-6 sm:pb-6"
+      >
+        <p className="font-sans text-xs leading-relaxed text-maroon-800 sm:text-sm sm:leading-6">
+          {toBritishSpelling(faq.answer)}
+        </p>
+      </div>
     </motion.div>
   );
 };
@@ -56,7 +61,7 @@ const ProductFaqPreview = ({
   showHeading = true,
   className = "mt-14 lg:mt-20",
 }) => {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
   const visibleFaqs = getVisibleFaqs(faqs);
   const displayFaqs = previewOnly ? getPreviewFaqs(faqs) : visibleFaqs;
   const [openIndex, setOpenIndex] = useState(0);
@@ -106,9 +111,14 @@ const ProductFaqPreview = ({
             key={faq._id || faq.id || `${faq.question}-${index}`}
             faq={faq}
             index={index}
-            open={openIndex === index}
-            onToggle={() =>
-              setOpenIndex((current) => (current === index ? -1 : index))
+            open={previewOnly ? openIndex === index : true}
+            onToggle={
+              previewOnly
+                ? () =>
+                    setOpenIndex((current) =>
+                      current === index ? -1 : index,
+                    )
+                : undefined
             }
           />
         ))}

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import {motion} from "motion/react";
+import { useStaticMotion } from "../../motion/useStaticMotion";
 import { getProductImageUrls } from "../../utils/productUtils";
 
 const ProductGallery = ({ images, title }) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
   const imageUrls = getProductImageUrls(images);
 
   if (imageUrls.length === 0) {

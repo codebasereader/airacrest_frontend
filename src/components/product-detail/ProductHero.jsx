@@ -1,10 +1,11 @@
 import React from "react";
-import { motion, useReducedMotion } from "motion/react";
+import {motion} from "motion/react";
+import { useStaticMotion } from "../../motion/useStaticMotion";
 import { LineReveal, LineRevealGroup } from "../../motion/LineReveal";
 import { toBritishSpelling } from "../../utils/britishSpelling";
 
 const ProductHero = ({ product }) => {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
   const highlights = product.highlights ?? [];
 
   return (

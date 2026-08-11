@@ -1,13 +1,14 @@
 import React from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { motion, useReducedMotion } from "motion/react";
+import {motion} from "motion/react";
+import { useStaticMotion } from "../motion/useStaticMotion";
 import LoginForm from "../components/auth/LoginForm";
 import { useAppSelector } from "../store/hooks";
 import { selectIsAuthenticated } from "../store/slices/authSlice";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
 
   const handleSuccess = () => {
     navigate("/admin/categories", { replace: true });

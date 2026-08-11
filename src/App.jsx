@@ -1,12 +1,14 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import ScrollToHash from "./components/ScrollToHash";
-import ChatBot from "./components/ChatBot";
 import FloatingWhatsAppButton from "./components/FloatingWhatsAppButton";
+import { WhatsAppSourceProvider } from "./context/WhatsAppSourceContext";
 import AuthHandler from "./components/auth/AuthHandler";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import SeoHead from "./components/SeoHead";
+import PrerenderReady from "./components/PrerenderReady";
 import Hero from "./section/Hero";
 import Certification from "./section/Certification";
 import About from "./section/About";
@@ -25,30 +27,41 @@ import AdminCategoriesPage from "./admin/pages/AdminCategoriesPage";
 import AdminProductsPage from "./admin/pages/AdminProductsPage";
 import AdminBlogsPage from "./admin/pages/AdminBlogsPage";
 import AdminEnquiriesPage from "./admin/pages/AdminEnquiriesPage";
+import { DEFAULT_DESCRIPTION, organizationJsonLd } from "./constants/seo";
+import { usePublicProducts } from "./hooks/usePublicProducts";
 
-const Home = () => (
-  <div className="min-h-screen bg-header">
-    <Header />
+const Home = () => {
+  const { loading: productsLoading } = usePublicProducts({ featured: true });
 
-    <main>
-      <Hero />
-      <Certification />
-      <About />
-      <OurProducts />
-      <Export />
-      <Enquire />
-    </main>
-    <Footer />
-  </div>
-);
+  return (
+    <div className="min-h-screen bg-header">
+      <SeoHead
+        path="/"
+        description={DEFAULT_DESCRIPTION}
+        jsonLd={organizationJsonLd()}
+      />
+      <PrerenderReady ready={!productsLoading} />
+      <Header />
+
+      <main>
+        <Hero />
+        <Certification />
+        <About />
+        <OurProducts />
+        <Export />
+        <Enquire />
+      </main>
+      <Footer />
+    </div>
+  );
+};
 
 const App = () => {
   return (
-    <>
+    <WhatsAppSourceProvider>
       <AuthHandler />
       <ScrollToHash />
       <FloatingWhatsAppButton />
-      {/* <ChatBot /> */}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<ProductsPage />} />
@@ -73,7 +86,7 @@ const App = () => {
           <Route path="blogs" element={<AdminBlogsPage />} />
         </Route>
       </Routes>
-    </>
+    </WhatsAppSourceProvider>
   );
 };
 

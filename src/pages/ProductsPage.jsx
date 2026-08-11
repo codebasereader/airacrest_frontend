@@ -1,8 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion, useReducedMotion } from "motion/react";
+import {motion} from "motion/react";
+import { useStaticMotion } from "../motion/useStaticMotion";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import SeoHead from "../components/SeoHead";
+import PrerenderReady from "../components/PrerenderReady";
 import ProductCard from "../components/ProductCard";
 import { usePublicProducts } from "../hooks/usePublicProducts";
 import { LineReveal, LineRevealGroup } from "../motion/LineReveal";
@@ -27,11 +30,17 @@ const ProductGridSkeleton = () => (
 );
 
 const ProductsPage = () => {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
   const { products, loading, error } = usePublicProducts();
 
   return (
     <div className="min-h-screen bg-cream-100">
+      <SeoHead
+        title="All Products"
+        path="/products"
+        description="Explore Aira Crest's full range of premium dehydrated vegetables, spices, and natural honey — sourced from India and prepared for global export."
+      />
+      <PrerenderReady ready={!loading} />
       <Header />
 
       <main className="px-4 py-14 sm:px-6 sm:py-16 lg:px-10 lg:py-20">

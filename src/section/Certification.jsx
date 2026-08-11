@@ -1,5 +1,6 @@
 import React from "react";
-import { motion, useReducedMotion } from "motion/react";
+import {motion} from "motion/react";
+import { useStaticMotion } from "../motion/useStaticMotion";
 import { LineReveal, LineRevealGroup } from "../motion/LineReveal";
 import { fadeUp, stagger } from "../motion/presets";
 
@@ -113,7 +114,7 @@ const CertCard = ({ cert, index }) => {
 };
 
 const Certification = () => {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
 
   return (
     <section
@@ -136,8 +137,8 @@ const Certification = () => {
 
         <motion.div
           className="mt-12 grid grid-cols-1 gap-y-2 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3 lg:gap-y-0"
-          initial="hidden"
-          whileInView="visible"
+          initial={prefersReducedMotion ? false : "hidden"}
+          whileInView={prefersReducedMotion ? undefined : "visible"}
           viewport={{ once: true, amount: 0.15 }}
           variants={prefersReducedMotion ? fadeUp : stagger(0.08, 0.15)}
         >

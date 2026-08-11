@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {AnimatePresence,motion} from "motion/react";
+import { useStaticMotion } from "../motion/useStaticMotion";
 
 import {
   fadeLeft,
@@ -30,7 +31,7 @@ const NAV_ITEMS = [
 ];
 
 const NavLink = ({ label, isActive, onClick, className = "" }) => {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
 
   return (
     <motion.button
@@ -72,7 +73,7 @@ const Header = () => {
 
   const [activeLink, setActiveLink] = useState("HOME");
 
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useStaticMotion();
 
   const { blogs, loading: blogsLoading } = usePublicBlogs();
   const showBlogsNav = !blogsLoading && areBlogsPubliclyVisible(blogs);
