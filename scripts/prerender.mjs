@@ -15,6 +15,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
+import { toBritishSpelling } from "../src/utils/britishSpelling.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -44,25 +45,47 @@ async function fetchApi(pathname) {
   return json.data;
 }
 
+function unwrapList(data) {
+  return Array.isArray(data) ? data : data?.items || [];
+}
+
+function htmlIncludesText(html, value) {
+  if (!value) return false;
+  const haystack = html.toLowerCase();
+  const variants = [value, toBritishSpelling(value)].filter(Boolean);
+  return variants.some((variant) => haystack.includes(String(variant).toLowerCase()));
+}
+
 async function collectRoutes() {
   const routes = new Set(["/", "/products"]);
+  const productsBySlug = new Map();
+  let featuredNames = [];
 
   try {
-    const list = await fetchApi("products?limit=100");
-    const products = Array.isArray(list) ? list : list?.items || [];
+    const products = unwrapList(await fetchApi("products?limit=100"));
 
     for (const product of products) {
       const slug = product?.slug;
       if (!slug) continue;
       routes.add(`/products/${slug}`);
+      productsBySlug.set(slug, {
+        name: product.name || "",
+        slug,
+        faqs: [],
+      });
 
       try {
         const detail = await fetchApi(`products/slug/${encodeURIComponent(slug)}`);
         const faqs = Array.isArray(detail?.faqs) ? detail.faqs : [];
-        const hasFaqs = faqs.some(
+        const visibleFaqs = faqs.filter(
           (faq) => faq?.question?.trim() && faq?.answer?.trim(),
         );
-        if (hasFaqs) {
+        productsBySlug.set(slug, {
+          name: detail?.name || product.name || "",
+          slug,
+          faqs: visibleFaqs,
+        });
+        if (visibleFaqs.length > 0) {
           routes.add(`/products/${slug}/faq`);
         }
       } catch (error) {
@@ -74,8 +97,19 @@ async function collectRoutes() {
   }
 
   try {
-    const list = await fetchApi("blogs?limit=100");
-    const blogs = Array.isArray(list) ? list : list?.items || [];
+    featuredNames = unwrapList(await fetchApi("products?featured=true&limit=100"))
+      .map((product) => product?.name)
+      .filter(Boolean);
+  } catch (error) {
+    console.warn("  featured product discovery failed:", error.message);
+  }
+
+  if (featuredNames.length === 0) {
+    featuredNames = [...productsBySlug.values()].map((product) => product.name).filter(Boolean);
+  }
+
+  try {
+    const blogs = unwrapList(await fetchApi("blogs?limit=100"));
     if (blogs.length >= 2) {
       routes.add("/blogs");
       for (const blog of blogs) {
@@ -86,17 +120,101 @@ async function collectRoutes() {
     console.warn("  blog discovery failed:", error.message);
   }
 
-  return [...routes].sort((a, b) => a.localeCompare(b));
+  return {
+    routes: [...routes].sort((a, b) => a.localeCompare(b)),
+    catalog: {
+      featuredNames,
+      productsBySlug,
+    },
+  };
+}
+
+function assertSnapshotQuality(route, html, catalog) {
+  const missing = [];
+  const isHeaderOnly =
+    /DOWNLOAD PRODUCT CATALOGUE/i.test(html) &&
+    !/OUR MAIN PRODUCTS/i.test(html) &&
+    !/<h1[\s>]/i.test(html);
+
+  if (route === "/") {
+    if (!/PREMIUM QUALITY/i.test(html)) missing.push("PREMIUM QUALITY");
+    if (!/OUR MAIN PRODUCTS/i.test(html)) missing.push("OUR MAIN PRODUCTS");
+    if (!html.includes("data-product-card")) missing.push("product cards");
+    const foundName = catalog.featuredNames.some((name) => htmlIncludesText(html, name));
+    if (catalog.featuredNames.length > 0 && !foundName) {
+      missing.push(`a featured product name (${catalog.featuredNames.slice(0, 3).join(", ")})`);
+    }
+  } else if (route === "/products") {
+    if (!html.includes("data-product-card")) missing.push("product cards");
+    const names = [...catalog.productsBySlug.values()].map((product) => product.name);
+    const foundName = names.some((name) => htmlIncludesText(html, name));
+    if (names.length > 0 && !foundName) missing.push("a product name");
+  } else if (route.endsWith("/faq")) {
+    const slug = route.replace(/^\/products\//, "").replace(/\/faq$/, "");
+    const product = catalog.productsBySlug.get(slug);
+    if (!/"@type":\s*"FAQPage"/i.test(html) && !/"@type":"FAQPage"/i.test(html)) {
+      missing.push("FAQPage JSON-LD");
+    }
+    if (!/Frequently Asked Questions/i.test(html)) {
+      missing.push("FAQ heading");
+    }
+    const faq = product?.faqs?.[0];
+    if (faq?.question && !htmlIncludesText(html, faq.question)) {
+      missing.push("FAQ question");
+    }
+    if (faq?.answer && !htmlIncludesText(html, faq.answer)) {
+      missing.push("FAQ answer");
+    }
+  } else if (route.startsWith("/products/")) {
+    const slug = route.replace(/^\/products\//, "");
+    const product = catalog.productsBySlug.get(slug);
+    if (!/<h1[\s>]/i.test(html)) missing.push("product h1");
+    if (product?.name && !htmlIncludesText(html, product.name)) {
+      missing.push(`product name (${product.name})`);
+    }
+  }
+
+  if (isHeaderOnly) {
+    return `header-only snapshot (catalogue/contact header without page body)`;
+  }
+  if (missing.length > 0) {
+    return `missing ${missing.join(", ")}`;
+  }
+  return null;
+}
+
+async function waitForRouteContent(page, route) {
+  if (route === "/" || route === "/products") {
+    await page.waitForSelector("[data-product-card]", { timeout: READY_TIMEOUT_MS });
+    return;
+  }
+
+  if (route.endsWith("/faq")) {
+    await page.waitForFunction(
+      () =>
+        /FAQPage/i.test(document.documentElement.innerHTML) &&
+        /Frequently Asked Questions/i.test(document.body.innerText),
+      { timeout: READY_TIMEOUT_MS },
+    );
+    return;
+  }
+
+  if (route.startsWith("/products/")) {
+    await page.waitForSelector("h1", { timeout: READY_TIMEOUT_MS });
+  }
 }
 
 function startPreviewServer() {
+  const viteBin = path.join(ROOT, "node_modules", "vite", "bin", "vite.js");
   const child = spawn(
-    "npx",
-    ["vite", "preview", "--host", "127.0.0.1", "--port", String(PORT), "--strictPort"],
+    process.execPath,
+    [viteBin, "preview", "--host", "127.0.0.1", "--port", String(PORT), "--strictPort"],
     {
       cwd: ROOT,
       stdio: ["ignore", "pipe", "pipe"],
       env: { ...process.env, BROWSER: "none" },
+      shell: false,
+      windowsHide: true,
     },
   );
 
@@ -204,7 +322,7 @@ function cleanPrerenderHtml(html) {
   return cleaned;
 }
 
-async function prerenderRoute(browser, route) {
+async function prerenderRoute(browser, route, catalog) {
   const page = await browser.newPage({
     userAgent:
       "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/W.X.Y.Z Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
@@ -219,6 +337,7 @@ async function prerenderRoute(browser, route) {
     await page.waitForSelector('html[data-prerender-ready="true"]', {
       timeout: READY_TIMEOUT_MS,
     });
+    await waitForRouteContent(page, route);
     // Extra settle time for product cards / fonts
     await sleep(500);
     await page.evaluate(() => {
@@ -234,6 +353,10 @@ async function prerenderRoute(browser, route) {
     });
     await sleep(200);
     const html = cleanPrerenderHtml(await page.content());
+    const qualityError = assertSnapshotQuality(route, html, catalog);
+    if (qualityError) {
+      return { route, ok: false, error: qualityError };
+    }
     const outFile = routeToFile(route);
     await fs.mkdir(path.dirname(outFile), { recursive: true });
     await fs.writeFile(outFile, html, "utf8");
@@ -292,7 +415,7 @@ async function main() {
   }
 
   console.log("Discovering public routes from API…");
-  const routes = await collectRoutes();
+  const { routes, catalog } = await collectRoutes();
   console.log(`Prerendering ${routes.length} routes:`);
   for (const route of routes) console.log(`  - ${route}`);
 
@@ -306,7 +429,7 @@ async function main() {
     const results = [];
     for (const route of routes) {
       process.stdout.write(`→ ${route} … `);
-      const result = await prerenderRoute(browser, route);
+      const result = await prerenderRoute(browser, route, catalog);
       results.push(result);
       if (result.ok) {
         console.log(`ok (${result.bytes} bytes)`);

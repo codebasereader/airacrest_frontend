@@ -40,11 +40,9 @@ const FaqItem = ({ faq, index, open, onToggle }) => {
           +
         </span>
       </button>
-      {/* Keep answers in the HTML for crawlers/prerender even when collapsed. */}
       <div
         id={panelId}
-        hidden={!open}
-        className="px-5 pb-5 sm:px-6 sm:pb-6"
+        className={`px-5 pb-5 sm:px-6 sm:pb-6 ${open ? "" : "hidden"}`}
       >
         <p className="font-sans text-xs leading-relaxed text-maroon-800 sm:text-sm sm:leading-6">
           {toBritishSpelling(faq.answer)}
@@ -72,6 +70,7 @@ const ProductFaqPreview = ({
 
   const hasMore = previewOnly && visibleFaqs.length > displayFaqs.length;
   const faqPath = getProductFaqPath(product);
+  const expandAll = prefersReducedMotion || !previewOnly;
 
   return (
     <section
@@ -111,14 +110,14 @@ const ProductFaqPreview = ({
             key={faq._id || faq.id || `${faq.question}-${index}`}
             faq={faq}
             index={index}
-            open={previewOnly ? openIndex === index : true}
+            open={expandAll ? true : openIndex === index}
             onToggle={
-              previewOnly
-                ? () =>
+              expandAll
+                ? undefined
+                : () =>
                     setOpenIndex((current) =>
                       current === index ? -1 : index,
                     )
-                : undefined
             }
           />
         ))}

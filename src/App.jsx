@@ -8,7 +8,6 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import SeoHead from "./components/SeoHead";
-import PrerenderReady from "./components/PrerenderReady";
 import Hero from "./section/Hero";
 import Certification from "./section/Certification";
 import About from "./section/About";
@@ -28,11 +27,8 @@ import AdminProductsPage from "./admin/pages/AdminProductsPage";
 import AdminBlogsPage from "./admin/pages/AdminBlogsPage";
 import AdminEnquiriesPage from "./admin/pages/AdminEnquiriesPage";
 import { DEFAULT_DESCRIPTION, organizationJsonLd } from "./constants/seo";
-import { usePublicProducts } from "./hooks/usePublicProducts";
 
 const Home = () => {
-  const { loading: productsLoading } = usePublicProducts({ featured: true });
-
   return (
     <div className="min-h-screen bg-header">
       <SeoHead
@@ -40,7 +36,6 @@ const Home = () => {
         description={DEFAULT_DESCRIPTION}
         jsonLd={organizationJsonLd()}
       />
-      <PrerenderReady ready={!productsLoading} />
       <Header />
 
       <main>

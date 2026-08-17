@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {motion} from "motion/react";
 import { useStaticMotion } from "../motion/useStaticMotion";
 import ProductCard from "../components/ProductCard";
+import PrerenderReady from "../components/PrerenderReady";
 import { usePublicProducts } from "../hooks/usePublicProducts";
 import { getCenteredProductGridClass } from "../utils/productUtils";
 import { LineReveal, LineRevealGroup } from "../motion/LineReveal";
@@ -35,6 +36,7 @@ const OurProducts = () => {
       id="products"
       className="bg-cream-100 px-4 py-14 sm:px-6 sm:py-16 lg:px-10 lg:py-20"
     >
+      <PrerenderReady ready={!loading && products.length > 0} />
       <div className="mx-auto max-w-[1200px]">
         <LineRevealGroup
           className="text-center"

@@ -11,6 +11,7 @@ const ProductCard = ({ product, className = "" }) => {
 
   return (
     <article
+      data-product-card
       className={`flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm shadow-maroon-950/5 ${className}`}
     >
       <ProductImageCarousel
