@@ -2,6 +2,8 @@ import { useCallback, useState } from "react";
 import * as uploadApi from "../../api/uploadApi";
 import { ApiError } from "../../api/client";
 import { getImageKey, getImageUrl } from "../utils/catalogImage";
+import { toDescriptiveUploadFileName } from "../../utils/publicImageUrl";
+import { slugify } from "../../utils/slugify";
 
 export const useImageUpload = (folder) => {
   const [uploading, setUploading] = useState(false);
@@ -22,7 +24,7 @@ export const useImageUpload = (folder) => {
   }, []);
 
   const uploadFile = useCallback(
-    async (file) => {
+    async (file, { slug } = {}) => {
       if (!file) return "";
 
       setUploading(true);
@@ -31,7 +33,9 @@ export const useImageUpload = (folder) => {
       try {
         const { uploadUrl, key, publicUrl } = await uploadApi.getPresignedUrl({
           folder,
-          fileName: file.name,
+          fileName: toDescriptiveUploadFileName(file.name, {
+            slug: slugify(slug) || slugify(file.name.replace(/\.[^.]+$/, "")),
+          }),
           contentType: file.type,
         });
 

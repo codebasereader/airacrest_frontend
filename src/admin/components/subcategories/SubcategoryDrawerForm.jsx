@@ -70,7 +70,7 @@ const SubcategoryDrawerForm = ({
 
   const handleFileSelect = async (file) => {
     try {
-      await uploadFile(file);
+      await uploadFile(file, { slug: form.name });
     } catch {
       // Error shown via uploadError
     }

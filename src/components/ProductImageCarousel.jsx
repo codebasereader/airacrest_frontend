@@ -4,12 +4,13 @@ import { getProductImageUrls } from "../utils/productUtils";
 
 const ProductImageCarousel = ({
   images,
+  slug,
   alt,
   interval = 2000,
   className = "",
   imageClassName = "h-full w-full object-cover object-center",
 }) => {
-  const urls = getProductImageUrls(images);
+  const urls = getProductImageUrls(images, { slug });
   const [activeIndex, setActiveIndex] = useState(0);
   const prefersReducedMotion = useStaticMotion();
 

@@ -177,6 +177,30 @@ function assertSnapshotQuality(route, html, catalog) {
   if (isHeaderOnly) {
     return `header-only snapshot (catalogue/contact header without page body)`;
   }
+
+  const canonical = canonicalForRoute(route);
+  if (!html.includes(`rel="canonical" href="${canonical}"`)) {
+    missing.push(`self-referencing canonical (${canonical})`);
+  }
+  if (!html.includes(`property="og:url" content="${canonical}"`)) {
+    missing.push(`og:url ${canonical}`);
+  }
+  if (/127\.0\.0\.1|localhost/i.test(html)) {
+    missing.push("localhost/dev URL leaked into HTML");
+  }
+  if (/airacrest-dev\.s3[^"']*\/products\//i.test(html)) {
+    missing.push("airacrest-dev product image URL");
+  }
+  if (/ChatGPT-Image/i.test(html)) {
+    missing.push("ChatGPT image filename");
+  }
+  if (
+    route.startsWith("/products/") &&
+    /property="og:title" content="Aira Crest \| Premium Dehydrated Foods/i.test(html)
+  ) {
+    missing.push("product-specific og:title");
+  }
+
   if (missing.length > 0) {
     return `missing ${missing.join(", ")}`;
   }
@@ -254,7 +278,7 @@ function cleanPrerenderHtml(html) {
     const matches = [...source.matchAll(pattern)];
     if (matches.length <= 1) return source;
     const preferred =
-      [...matches].find((match) => prefer(match[0])) ||
+      [...matches].reverse().find((match) => prefer(match[0])) ||
       matches[matches.length - 1];
     let result = source;
     for (const match of matches) {
@@ -322,6 +346,101 @@ function cleanPrerenderHtml(html) {
   return cleaned;
 }
 
+function canonicalForRoute(route) {
+  return route === "/" ? `${SITE_URL}/` : `${SITE_URL}${route}`;
+}
+
+function extractTitle(html) {
+  const match = html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
+  return decodeHtml(match?.[1]?.trim() || "");
+}
+
+function decodeHtml(value) {
+  return value
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+function escapeAttr(value) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;");
+}
+
+function replaceOrInsertHeadTag(html, pattern, tag) {
+  const matches = [...html.matchAll(pattern)];
+  let result = html;
+  for (const match of matches) {
+    result = result.replace(match[0], "");
+  }
+  if (!/<\/head>/i.test(result)) return `${result}${tag}`;
+  return result.replace(/<\/head>/i, `  ${tag}\n</head>`);
+}
+
+function titleForRoute(route, catalog, html) {
+  if (route === "/") {
+    return "Aira Crest | Premium Dehydrated Foods, Spices & Honey Exports";
+  }
+  if (route === "/products") return "All Products | Aira Crest";
+  if (route === "/blogs") return "Insights & Articles | Aira Crest";
+
+  if (route.endsWith("/faq")) {
+    const slug = route.replace(/^\/products\//, "").replace(/\/faq$/, "");
+    const name = toBritishSpelling(catalog.productsBySlug.get(slug)?.name || "");
+    if (name) return `${name} FAQ | Aira Crest`;
+  } else if (route.startsWith("/products/")) {
+    const slug = route.replace(/^\/products\//, "");
+    const name = toBritishSpelling(catalog.productsBySlug.get(slug)?.name || "");
+    if (name) return `${name} | Aira Crest`;
+  }
+
+  const titles = [...html.matchAll(/<title\b[^>]*>([\s\S]*?)<\/title>/gi)]
+    .map((match) => decodeHtml(match[1].trim()))
+    .filter(
+      (text) =>
+        text &&
+        text !== "Aira Crest" &&
+        !text.startsWith("Aira Crest | Premium Dehydrated Foods"),
+    );
+  return titles.at(-1) || extractTitle(html);
+}
+
+function applySelfReferencingSeo(html, route, catalog) {
+  const canonical = canonicalForRoute(route);
+  const title = titleForRoute(route, catalog, html);
+  let next = html;
+  next = replaceOrInsertHeadTag(
+    next,
+    /<title\b[^>]*>[\s\S]*?<\/title>/gi,
+    `<title>${escapeAttr(title)}</title>`,
+  );
+  next = replaceOrInsertHeadTag(
+    next,
+    /<link\b[^>]*\brel=["']canonical["'][^>]*>/gi,
+    `<link rel="canonical" href="${canonical}">`,
+  );
+  next = replaceOrInsertHeadTag(
+    next,
+    /<meta\b[^>]*\bproperty=["']og:url["'][^>]*>/gi,
+    `<meta property="og:url" content="${canonical}">`,
+  );
+  next = replaceOrInsertHeadTag(
+    next,
+    /<meta\b[^>]*\bproperty=["']og:title["'][^>]*>/gi,
+    `<meta property="og:title" content="${escapeAttr(title)}">`,
+  );
+  next = replaceOrInsertHeadTag(
+    next,
+    /<meta\b[^>]*\bname=["']twitter:title["'][^>]*>/gi,
+    `<meta name="twitter:title" content="${escapeAttr(title)}">`,
+  );
+  return next;
+}
+
 async function prerenderRoute(browser, route, catalog) {
   const page = await browser.newPage({
     userAgent:
@@ -352,7 +471,11 @@ async function prerenderRoute(browser, route, catalog) {
       window.scrollTo(0, 0);
     });
     await sleep(200);
-    const html = cleanPrerenderHtml(await page.content());
+    const html = applySelfReferencingSeo(
+      cleanPrerenderHtml(await page.content()),
+      route,
+      catalog,
+    );
     const qualityError = assertSnapshotQuality(route, html, catalog);
     if (qualityError) {
       return { route, ok: false, error: qualityError };
@@ -414,10 +537,16 @@ async function main() {
     process.exit(1);
   }
 
+  const spaShell = await fs.readFile(distIndex, "utf8");
+
   console.log("Discovering public routes from API…");
   const { routes, catalog } = await collectRoutes();
-  console.log(`Prerendering ${routes.length} routes:`);
-  for (const route of routes) console.log(`  - ${route}`);
+  const orderedRoutes = [
+    ...routes.filter((route) => route !== "/"),
+    ...routes.filter((route) => route === "/"),
+  ];
+  console.log(`Prerendering ${orderedRoutes.length} routes:`);
+  for (const route of orderedRoutes) console.log(`  - ${route}`);
 
   const { child, getOutput } = startPreviewServer();
   let browser;
@@ -427,7 +556,8 @@ async function main() {
     browser = await chromium.launch({ headless: true });
 
     const results = [];
-    for (const route of routes) {
+    for (const route of orderedRoutes) {
+      await fs.writeFile(distIndex, spaShell, "utf8");
       process.stdout.write(`→ ${route} … `);
       const result = await prerenderRoute(browser, route, catalog);
       results.push(result);

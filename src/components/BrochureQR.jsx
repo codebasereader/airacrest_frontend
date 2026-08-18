@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Copy01Icon, Link01Icon } from "@hugeicons/core-free-icons";
@@ -9,15 +9,9 @@ import {
 } from "../constants/brochure";
 
 const BrochureQR = ({ variant = "card" }) => {
-  const [brochureUrl, setBrochureUrl] = useState("");
-  const [qrUrl, setQrUrl] = useState("");
+  const brochureUrl = getBrochurePdfUrl();
+  const qrUrl = getBrochureQrUrl();
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    const origin = window.location.origin;
-    setBrochureUrl(getBrochurePdfUrl(origin));
-    setQrUrl(getBrochureQrUrl(origin));
-  }, []);
 
   const handleCopy = async () => {
     if (!brochureUrl) return;
@@ -29,8 +23,6 @@ const BrochureQR = ({ variant = "card" }) => {
       /* clipboard unavailable */
     }
   };
-
-  if (!brochureUrl || !qrUrl) return null;
 
   const isCompact = variant === "compact";
 

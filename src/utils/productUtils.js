@@ -1,12 +1,17 @@
-export const getProductImageUrls = (images) => {
+import { toPublicProductImageUrl } from "./publicImageUrl";
+
+export const getProductImageUrls = (images, { slug } = {}) => {
   if (!Array.isArray(images)) return [];
   return images
-    .map((image) => (typeof image === "string" ? image : image?.url))
+    .map((image, index) => {
+      const url = typeof image === "string" ? image : image?.url;
+      return toPublicProductImageUrl(url, { slug, index });
+    })
     .filter(Boolean);
 };
 
-export const getProductPrimaryImage = (images) =>
-  getProductImageUrls(images)[0] ?? "";
+export const getProductPrimaryImage = (images, { slug } = {}) =>
+  getProductImageUrls(images, { slug })[0] ?? "";
 
 export const sortProductsByOrder = (products) =>
   [...products].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));

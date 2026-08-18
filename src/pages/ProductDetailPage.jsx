@@ -70,7 +70,9 @@ const ProductDetailPage = () => {
   const hasFaqs = getVisibleFaqs(product.faqs).length > 0;
   const productName = toBritishSpelling(product.name);
   const productPath = getProductPath(product);
-  const productImage = getProductPrimaryImage(product.images);
+  const productImage = getProductPrimaryImage(product.images, {
+    slug: product.slug,
+  });
 
   return (
     <div className="min-h-screen bg-cream-100">
@@ -108,6 +110,7 @@ const ProductDetailPage = () => {
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-14 xl:gap-16">
             <ProductGallery
               images={product.images}
+              slug={product.slug}
               title={toBritishSpelling(product.name)}
             />
             <div>

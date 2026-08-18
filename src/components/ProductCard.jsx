@@ -16,6 +16,7 @@ const ProductCard = ({ product, className = "" }) => {
     >
       <ProductImageCarousel
         images={product.images}
+        slug={product.slug}
         alt={productName}
         className="aspect-square rounded-t-2xl"
       />

@@ -1,4 +1,7 @@
 import { getImageKey, getImageUrl } from "./catalogImage";
+import { slugify } from "../../utils/slugify";
+
+export { slugify };
 
 export const BLOG_STATUSES = [
   { value: "draft", label: "Draft" },
@@ -15,15 +18,6 @@ export const EMPTY_BLOG_FORM = {
   author: "Aira Crest Team",
   tags: "",
 };
-
-export const slugify = (text) =>
-  text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
 
 export const getRelationId = (relation) => {
   if (!relation) return "";

@@ -155,7 +155,7 @@ const BlogDrawerForm = ({
         uploading={uploading}
         error={uploadError}
         disabled={saving}
-        onFileSelect={uploadFile}
+        onFileSelect={(file) => uploadFile(file, { slug: form.slug || form.title })}
         onClear={clearImage}
       />
 
@@ -163,6 +163,7 @@ const BlogDrawerForm = ({
         value={form.content}
         onChange={handleContentChange}
         disabled={saving || uploading}
+        slug={form.slug || form.title}
       />
 
       <AdminFormField

@@ -2,6 +2,8 @@ import { useCallback, useState } from "react";
 import * as uploadApi from "../../api/uploadApi";
 import { ApiError } from "../../api/client";
 import { normalizeImages } from "../utils/catalogImage";
+import { toDescriptiveUploadFileName } from "../../utils/publicImageUrl";
+import { slugify } from "../../utils/slugify";
 
 export const useMultipleImageUpload = (folder) => {
   const [images, setImages] = useState([]);
@@ -19,7 +21,7 @@ export const useMultipleImageUpload = (folder) => {
   }, []);
 
   const uploadFile = useCallback(
-    async (file) => {
+    async (file, { slug, index } = {}) => {
       if (!file) return null;
 
       setUploading(true);
@@ -28,7 +30,10 @@ export const useMultipleImageUpload = (folder) => {
       try {
         const { uploadUrl, key, publicUrl } = await uploadApi.getPresignedUrl({
           folder,
-          fileName: file.name,
+          fileName: toDescriptiveUploadFileName(file.name, {
+            slug: slugify(slug) || slugify(file.name.replace(/\.[^.]+$/, "")),
+            index,
+          }),
           contentType: file.type,
         });
 
@@ -60,15 +65,16 @@ export const useMultipleImageUpload = (folder) => {
   );
 
   const uploadFiles = useCallback(
-    async (files) => {
+    async (files, { slug } = {}) => {
       const uploaded = [];
-      for (const file of files) {
-        const result = await uploadFile(file);
+      const startIndex = images.length;
+      for (const [offset, file] of files.entries()) {
+        const result = await uploadFile(file, { slug, index: startIndex + offset });
         if (result) uploaded.push(result);
       }
       return uploaded;
     },
-    [uploadFile],
+    [uploadFile, images.length],
   );
 
   const removeImage = useCallback((index) => {

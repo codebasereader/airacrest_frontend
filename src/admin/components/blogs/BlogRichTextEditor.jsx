@@ -31,7 +31,7 @@ const ToolbarButton = ({ onClick, label, title, className = "", active }) => (
   </button>
 );
 
-const BlogRichTextEditor = ({ value, onChange, disabled, label = "Content" }) => {
+const BlogRichTextEditor = ({ value, onChange, disabled, label = "Content", slug }) => {
   const editorRef = useRef(null);
   const [activeFormats, setActiveFormats] = useState(new Set());
   const { uploadFile, uploading, error: uploadError } = useImageUpload("blogs");
@@ -80,7 +80,7 @@ const BlogRichTextEditor = ({ value, onChange, disabled, label = "Content" }) =>
     if (!file || disabled) return;
 
     try {
-      const key = await uploadFile(file);
+      const key = await uploadFile(file, { slug });
       if (!key) return;
 
       editorRef.current?.focus();

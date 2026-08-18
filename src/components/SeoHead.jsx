@@ -24,7 +24,11 @@ const SeoHead = ({
   const fullTitle = title ? brandTitle(title) : DEFAULT_TITLE;
   const metaDescription = truncateMeta(description || DEFAULT_DESCRIPTION);
   const canonical = absoluteUrl(path);
-  const ogImage = image || absoluteUrl("/fulllogo.webp");
+  const ogImage = image
+    ? /^https?:\/\//i.test(image)
+      ? image
+      : absoluteUrl(image)
+    : absoluteUrl("/fulllogo.webp");
 
   const schemas = jsonLd
     ? Array.isArray(jsonLd)
