@@ -8,7 +8,7 @@ export const SITE_URL = (
 ).replace(/\/$/, "");
 
 export const DEFAULT_DESCRIPTION =
-  "Aira Crest exports premium dehydrated vegetables & fruits, spices, and natural honey from India — trusted quality, global reach, lasting partnerships.";
+  "Aira Crest exports premium dehydrated vegetables & fruits, spices, and natural honey from India, trusted quality, global reach, lasting partnerships.";
 
 export const DEFAULT_TITLE = `${SITE_NAME} | Premium Dehydrated Foods, Spices & Honey Exports`;
 

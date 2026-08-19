@@ -7,34 +7,32 @@ import { transitions } from "../motion/presets";
 import { BROCHURE_PDF_NAME, BROCHURE_PDF_URL } from "../constants/brochure";
 
 const VARIANTS = {
-  headerDesktop:
-    "hidden xl:inline-flex items-center gap-2 rounded-sm border border-gold-400/45 bg-transparent px-3.5 py-2.5 font-sans text-[10px] font-bold tracking-[0.12em] text-cream-100 no-underline transition-colors hover:border-gold-400 hover:bg-gold-400/10 hover:text-gold-400",
-  headerMobile:
-    "inline-flex xl:hidden items-center gap-1.5 rounded-sm border border-gold-400/40 bg-transparent px-2.5 py-2 font-sans text-[9px] font-bold tracking-[0.1em] text-cream-100 no-underline transition-colors hover:border-gold-400 hover:text-gold-400 sm:gap-2 sm:px-3 sm:py-2.5 sm:text-[10px] sm:tracking-[0.12em]",
+  header:
+    "inline-flex items-center gap-1.5 rounded-sm border border-gold-400/40 bg-transparent px-2.5 py-2 font-sans text-[9px] font-bold tracking-[0.1em] text-cream-100 no-underline transition-colors hover:border-gold-400 hover:text-gold-400 sm:gap-2 sm:px-3 sm:py-2.5 sm:text-[10px] sm:tracking-[0.12em] xl:gap-2 xl:border-gold-400/45 xl:px-3.5 xl:py-2.5 xl:hover:bg-gold-400/10",
   enquire:
     "inline-flex w-full items-center justify-center gap-2 rounded-sm border border-maroon-700 bg-white px-8 py-3.5 font-sans text-[11px] font-semibold tracking-[0.14em] text-maroon-900 no-underline transition-colors duration-200 hover:border-maroon-900 hover:bg-maroon-50 sm:w-auto sm:px-10",
 };
 
 const DownloadBrochureButton = ({ variant = "enquire", className = "" }) => {
   const prefersReducedMotion = useStaticMotion();
-  const isHeader = variant === "headerDesktop" || variant === "headerMobile";
+  const isHeader = variant === "header";
 
   const label = (
     <>
       <HugeiconsIcon
         icon={Download01Icon}
-        size={isHeader && variant === "headerMobile" ? 14 : 16}
+        size={isHeader ? 14 : 16}
         color="currentColor"
         strokeWidth={1.5}
         className={variant === "enquire" ? "text-maroon-700" : "shrink-0"}
         aria-hidden="true"
       />
-      <span className={variant === "headerMobile" ? "max-[380px]:hidden" : ""}>
+      <span
+        className={isHeader ? "cta-short-label" : undefined}
+        data-short-label={isHeader ? "CATALOGUE" : undefined}
+      >
         DOWNLOAD PRODUCT CATALOGUE
       </span>
-      {variant === "headerMobile" && (
-        <span className="hidden max-[380px]:inline">CATALOGUE</span>
-      )}
     </>
   );
 

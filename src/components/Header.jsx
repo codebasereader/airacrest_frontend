@@ -268,34 +268,17 @@ const Header = () => {
           {/* CTA + mobile toggle */}
 
           <div className="flex min-w-0 items-center justify-end gap-2 sm:gap-3 xl:justify-self-end">
-            <DownloadBrochureButton variant="headerMobile" />
-
-            <DownloadBrochureButton variant="headerDesktop" />
+            <DownloadBrochureButton variant="header" />
 
             <motion.button
               type="button"
-              className="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-sm border-0 bg-gold-500 px-2.5 py-2 font-sans text-[9px] font-bold tracking-[0.12em] text-maroon-950 no-underline xl:hidden sm:px-3 sm:py-2.5 sm:text-[10px] sm:tracking-[0.14em]"
-              onClick={navigateToEnquiry}
-              whileHover={
-                prefersReducedMotion
-                  ? undefined
-                  : { backgroundColor: "#e5a647" }
-              }
-              whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
-              transition={transitions.fast}
-            >
-              <span className="max-[380px]:hidden">REQUEST A QUOTE</span>
-
-              <span className="hidden max-[380px]:inline">ENQUIRY</span>
-            </motion.button>
-
-            <motion.button
-              type="button"
-              className="hidden shrink-0 cursor-pointer rounded-sm border-0 bg-gold-500 px-5 py-2.5 font-sans text-[11px] font-bold tracking-[0.18em] text-maroon-950 no-underline xl:inline-flex"
+              className="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-sm border-0 bg-gold-500 px-2.5 py-2 font-sans text-[9px] font-bold tracking-[0.12em] text-maroon-950 no-underline sm:px-3 sm:py-2.5 sm:text-[10px] sm:tracking-[0.14em] xl:px-5 xl:py-2.5 xl:text-[11px] xl:tracking-[0.18em]"
               onClick={navigateToEnquiry}
               {...ctaProps}
             >
-              REQUEST A QUOTE
+              <span className="cta-short-label" data-short-label="ENQUIRY">
+                REQUEST A QUOTE
+              </span>
             </motion.button>
 
             <motion.button

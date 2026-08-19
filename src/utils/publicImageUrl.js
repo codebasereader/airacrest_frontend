@@ -1,4 +1,5 @@
 const S3_HOST_RE = /^https?:\/\/airacrest(?:-dev)?\.s3\.[^/]+/i;
+const PUBLIC_ORIGIN = "https://www.airacrest.com";
 
 export const getImageExtension = (url) => {
   try {
@@ -21,7 +22,7 @@ export const isManagedS3Url = (url) =>
 export const toPublicProductImageUrl = (url, { slug, index = 0 } = {}) => {
   if (!url || !isManagedS3Url(url) || !slug) return url;
   if (!import.meta.env.PROD) return url;
-  return getMirroredProductImagePath(slug, index, url);
+  return `${PUBLIC_ORIGIN}${getMirroredProductImagePath(slug, index, url)}`;
 };
 
 export const toDescriptiveUploadFileName = (originalName, { slug, index } = {}) => {

@@ -9,8 +9,8 @@ export const COMPANY = {
   phoneDisplay: "+91 9187454810",
   phoneTel: "+919187454810",
   whatsappDisplay: "+91 9187454810",
-  /** Digits for wa.me links — matches brief: https://wa.me/9187454810 */
-  whatsappE164: "9187454810",
+  /** Digits for wa.me links — country code + 10-digit mobile: 91 9187454810 */
+  whatsappE164: "919187454810",
 };
 
 export const COMPANY_REGISTRATIONS = [

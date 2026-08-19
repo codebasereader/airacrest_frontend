@@ -191,6 +191,44 @@ function assertSnapshotQuality(route, html, catalog) {
   if (/airacrest-dev\.s3[^"']*\/products\//i.test(html)) {
     missing.push("airacrest-dev product image URL");
   }
+  if (/wa\.me\/9187454810(?!\d)/i.test(html)) {
+    missing.push("WhatsApp link missing country code (wa.me/919187454810)");
+  }
+  if (/CATALOGUECATALOGUE/i.test(html.replace(/\s+/g, ""))) {
+    missing.push("duplicated catalogue button label");
+  }
+  if (/REQUESTAQUOTEENQUIRY/i.test(html.replace(/\s+/g, ""))) {
+    missing.push("duplicated enquiry button label");
+  }
+  if (
+    (route === "/" || route === "/products" || route.startsWith("/products/")) &&
+    /airacrest(?:-dev)?\.s3[^"']*\/products\//i.test(html)
+  ) {
+    missing.push("S3 product image URL (use /media/products)");
+  }
+  if (route === "/" && !html.includes("https://www.airacrest.com/Aira_Crest_Brochure.pdf")) {
+    missing.push("production catalogue PDF URL");
+  }
+  if (route === "/" && !html.includes("https://www.airacrest.com/media/products/")) {
+    missing.push("production product image path");
+  }
+  if (route === "/" && /India\s+[—–-]\s+trusted quality/i.test(html)) {
+    missing.push("em dash in meta description (use a comma)");
+  }
+  if (
+    route === "/" &&
+    !html.includes(
+      "India, trusted quality, global reach, lasting partnerships.",
+    )
+  ) {
+    missing.push("homepage meta description comma wording");
+  }
+  if (route === "/") {
+    const visibleText = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    if (!/CIN U10302KA2026PTC215246/.test(visibleText)) {
+      missing.push("CIN label and number with a space between them");
+    }
+  }
   if (/ChatGPT-Image/i.test(html)) {
     missing.push("ChatGPT image filename");
   }
@@ -298,6 +336,9 @@ function cleanPrerenderHtml(html) {
     tag.replace(/<\/?title\b[^>]*>/gi, "").trim();
 
   let cleaned = html;
+  cleaned = cleaned
+    .replaceAll(`http://127.0.0.1:${PORT}`, SITE_URL)
+    .replaceAll(`http://localhost:${PORT}`, SITE_URL);
   cleaned = keepPreferred(
     cleaned,
     /<title\b[^>]*>[\s\S]*?<\/title>/gi,

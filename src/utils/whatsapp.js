@@ -1,7 +1,7 @@
 import { COMPANY } from "../constants/company";
 
-/** Digits only, as used in wa.me links (per brief). */
-export const WHATSAPP_WA_ME_NUMBER = "9187454810";
+/** Digits only, as used in wa.me links (country code + mobile). */
+export const WHATSAPP_WA_ME_NUMBER = COMPANY.whatsappE164;
 
 const titleFromSlug = (slug) =>
   decodeURIComponent(slug)

@@ -154,9 +154,8 @@ const Footer = () => {
               <span className="font-semibold tracking-[0.12em] text-gold-400/90 uppercase">
                 CIN
               </span>
-              <span className="mt-1 block break-all text-cream-100/90">
-                {COMPANY.cin}
-              </span>
+              {" "}
+              <span className="break-all text-cream-100/90">{COMPANY.cin}</span>
             </p>
 
             <ul

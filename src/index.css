@@ -111,3 +111,18 @@
     @apply bg-maroon-200 text-maroon-950;
   }
 }
+
+/* Shorten header CTAs on very small screens without a second text node in the HTML. */
+@media (max-width: 380px) {
+  .cta-short-label {
+    font-size: 0 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .cta-short-label::after {
+    content: attr(data-short-label);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+}
