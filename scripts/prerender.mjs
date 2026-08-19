@@ -194,11 +194,21 @@ function assertSnapshotQuality(route, html, catalog) {
   if (/wa\.me\/9187454810(?!\d)/i.test(html)) {
     missing.push("WhatsApp link missing country code (wa.me/919187454810)");
   }
+  if (!/wa\.me\/919187454810/i.test(html)) {
+    missing.push("WhatsApp international number on this route");
+  }
+  if (/data-short-label/i.test(html) || />CATALOGUE<\/span>/i.test(html)) {
+    missing.push("duplicated catalogue button label");
+  }
   if (/CATALOGUECATALOGUE/i.test(html.replace(/\s+/g, ""))) {
     missing.push("duplicated catalogue button label");
   }
   if (/REQUESTAQUOTEENQUIRY/i.test(html.replace(/\s+/g, ""))) {
     missing.push("duplicated enquiry button label");
+  }
+  const visibleText = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+  if (!/CIN U10302KA2026PTC215246/.test(visibleText)) {
+    missing.push("CIN label and number with a space between them");
   }
   if (
     (route === "/" || route === "/products" || route.startsWith("/products/")) &&
@@ -222,12 +232,6 @@ function assertSnapshotQuality(route, html, catalog) {
     )
   ) {
     missing.push("homepage meta description comma wording");
-  }
-  if (route === "/") {
-    const visibleText = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
-    if (!/CIN U10302KA2026PTC215246/.test(visibleText)) {
-      missing.push("CIN label and number with a space between them");
-    }
   }
   if (/ChatGPT-Image/i.test(html)) {
     missing.push("ChatGPT image filename");
@@ -484,8 +488,10 @@ function applySelfReferencingSeo(html, route, catalog) {
 
 async function prerenderRoute(browser, route, catalog) {
   const page = await browser.newPage({
+    // Use a normal browser UA so skipCrawlerRemount cannot freeze a stale
+    // product HTML snapshot (header/footer would never rebuild).
     userAgent:
-      "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/W.X.Y.Z Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
     viewport: { width: 412, height: 915 },
   });
   // Disable entrance animations so crawler HTML/screenshots show real content.
@@ -580,6 +586,12 @@ async function main() {
 
   const spaShell = await fs.readFile(distIndex, "utf8");
 
+  // Drop previously prerendered route HTML so vite preview always boots the
+  // SPA shell. Otherwise Googlebot skip-remount can freeze an old header/footer
+  // into product pages.
+  await fs.rm(path.join(DIST, "products"), { recursive: true, force: true });
+  await fs.rm(path.join(DIST, "blogs"), { recursive: true, force: true });
+
   console.log("Discovering public routes from API…");
   const { routes, catalog } = await collectRoutes();
   const orderedRoutes = [
@@ -599,6 +611,9 @@ async function main() {
     const results = [];
     for (const route of orderedRoutes) {
       await fs.writeFile(distIndex, spaShell, "utf8");
+      if (route !== "/") {
+        await fs.rm(routeToFile(route), { force: true });
+      }
       process.stdout.write(`→ ${route} … `);
       const result = await prerenderRoute(browser, route, catalog);
       results.push(result);

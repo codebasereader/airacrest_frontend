@@ -276,9 +276,7 @@ const Header = () => {
               onClick={navigateToEnquiry}
               {...ctaProps}
             >
-              <span className="cta-short-label" data-short-label="ENQUIRY">
-                REQUEST A QUOTE
-              </span>
+              REQUEST A QUOTE
             </motion.button>
 
             <motion.button

@@ -152,10 +152,8 @@ const Footer = () => {
 
             <p className="mt-4 font-sans text-xs leading-relaxed text-cream-200/75">
               <span className="font-semibold tracking-[0.12em] text-gold-400/90 uppercase">
-                CIN
+                CIN {COMPANY.cin}
               </span>
-              {" "}
-              <span className="break-all text-cream-100/90">{COMPANY.cin}</span>
             </p>
 
             <ul

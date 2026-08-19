@@ -1,6 +1,22 @@
 # Amplify Hosting redirects / rewrites
 # Order matters: specific rules first, SPA fallback last.
 
+customHeaders:
+  # Product/home HTML must not stay cached after a deploy, or buyers keep
+  # seeing the previous header/footer WhatsApp numbers and labels.
+  - pattern: "**/*.html"
+    headers:
+      - key: "Cache-Control"
+        value: "no-cache, no-store, must-revalidate"
+      - key: "Pragma"
+        value: "no-cache"
+  - pattern: "/"
+    headers:
+      - key: "Cache-Control"
+        value: "no-cache, no-store, must-revalidate"
+      - key: "Pragma"
+        value: "no-cache"
+
 redirects:
   # Serve Search Console verification + SEO files as-is (never rewrite to index.html)
   - source: "/google775ce10030c74b40.html"

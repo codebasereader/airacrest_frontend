@@ -27,10 +27,7 @@ const DownloadBrochureButton = ({ variant = "enquire", className = "" }) => {
         className={variant === "enquire" ? "text-maroon-700" : "shrink-0"}
         aria-hidden="true"
       />
-      <span
-        className={isHeader ? "cta-short-label" : undefined}
-        data-short-label={isHeader ? "CATALOGUE" : undefined}
-      >
+      <span>
         DOWNLOAD PRODUCT CATALOGUE
       </span>
     </>
