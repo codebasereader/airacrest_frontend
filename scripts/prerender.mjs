@@ -16,6 +16,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import { toBritishSpelling } from "../src/utils/britishSpelling.js";
+import { toPublicProductImageUrl } from "../src/utils/publicImageUrl.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -71,6 +72,7 @@ async function collectRoutes() {
       productsBySlug.set(slug, {
         name: product.name || "",
         slug,
+        images: Array.isArray(product.images) ? product.images : [],
         faqs: [],
       });
 
@@ -83,6 +85,11 @@ async function collectRoutes() {
         productsBySlug.set(slug, {
           name: detail?.name || product.name || "",
           slug,
+          images: Array.isArray(detail?.images)
+            ? detail.images
+            : Array.isArray(product.images)
+              ? product.images
+              : [],
           faqs: visibleFaqs,
         });
         if (visibleFaqs.length > 0) {
@@ -483,6 +490,30 @@ function applySelfReferencingSeo(html, route, catalog) {
     /<meta\b[^>]*\bname=["']twitter:title["'][^>]*>/gi,
     `<meta name="twitter:title" content="${escapeAttr(title)}">`,
   );
+  next = rewriteLeakedProductImages(next, catalog);
+  return next;
+}
+
+function rewriteLeakedProductImages(html, catalog) {
+  let next = html;
+  for (const product of catalog.productsBySlug.values()) {
+    const images = Array.isArray(product.images) ? product.images : [];
+    images.forEach((image, index) => {
+      const url = typeof image === "string" ? image : image?.url;
+      if (!url) return;
+      const clean = toPublicProductImageUrl(url, {
+        slug: product.slug,
+        index,
+      });
+      if (!clean || clean === url) return;
+      next = next.split(url).join(clean);
+      try {
+        next = next.split(encodeURI(url)).join(clean);
+      } catch {
+        // ignore malformed URLs
+      }
+    });
+  }
   return next;
 }
 

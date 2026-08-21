@@ -34,7 +34,7 @@ export const useImageUpload = (folder) => {
         const { uploadUrl, key, publicUrl } = await uploadApi.getPresignedUrl({
           folder,
           fileName: toDescriptiveUploadFileName(file.name, {
-            slug: slugify(slug) || slugify(file.name.replace(/\.[^.]+$/, "")),
+            slug: slugify(slug) || "product",
           }),
           contentType: file.type,
         });

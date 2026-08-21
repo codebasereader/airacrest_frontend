@@ -1,4 +1,6 @@
-import { toPublicProductImageUrl } from "./publicImageUrl";
+import { toPublicProductImageUrl, withPublicProductImages } from "./publicImageUrl";
+
+export { withPublicProductImages };
 
 export const getProductImageUrls = (images, { slug } = {}) => {
   if (!Array.isArray(images)) return [];

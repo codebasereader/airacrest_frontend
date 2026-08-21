@@ -188,7 +188,7 @@ const ProductDrawerForm = ({
   const handleFileSelect = async (files) => {
     try {
       await uploadFiles(files, {
-        slug: form.slug || form.name,
+        slug: product?.slug || form.name,
       });
     } catch {
       // Error shown via uploadError

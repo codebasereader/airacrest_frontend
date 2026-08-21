@@ -2,7 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import * as productsApi from "../api/productsApi";
 import { ApiError } from "../api/client";
 import { normalizeLoadMoreResponse } from "../api/loadMore";
-import { isMongoObjectId, sortProductsByOrder } from "../utils/productUtils";
+import {
+  isMongoObjectId,
+  sortProductsByOrder,
+  withPublicProductImages,
+} from "../utils/productUtils";
 
 export const usePublicProducts = (filters = {}) => {
   const { category, subcategory, featured, search } = filters;
@@ -24,7 +28,7 @@ export const usePublicProducts = (filters = {}) => {
 
       const data = await productsApi.listPublicProducts(apiFilters);
       const { items } = normalizeLoadMoreResponse(data);
-      setProducts(sortProductsByOrder(items));
+      setProducts(sortProductsByOrder(items).map(withPublicProductImages));
     } catch (err) {
       setError(
         err instanceof ApiError
@@ -77,7 +81,7 @@ export const usePublicProduct = (slugOrId) => {
         }
 
         if (!cancelled) {
-          setProduct(data ?? null);
+          setProduct(data ? withPublicProductImages(data) : null);
           setResolvedViaId(viaId);
         }
       } catch (err) {
