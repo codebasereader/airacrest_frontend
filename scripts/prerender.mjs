@@ -226,26 +226,19 @@ function assertSnapshotQuality(route, html, catalog) {
   if (route === "/" && !html.includes("https://www.airacrest.com/Aira_Crest_Brochure.pdf")) {
     missing.push("production catalogue PDF URL");
   }
-  if (route === "/" && !html.includes("https://www.airacrest.com/media/products/")) {
-    missing.push("production product image path");
-  }
-  if (route === "/" && /India\s+[—–-]\s+trusted quality/i.test(html)) {
-    missing.push("em dash in meta description (use a comma)");
-  }
   if (
     route === "/" &&
-    !html.includes(
-      "India, trusted quality, global reach, lasting partnerships.",
-    )
+    !html.includes("https://www.airacrest.com/media/products/") &&
+    !html.includes("https://media.airacrest.com/")
   ) {
-    missing.push("homepage meta description comma wording");
+    missing.push("production product image path");
   }
   if (/ChatGPT-Image/i.test(html)) {
     missing.push("ChatGPT image filename");
   }
   if (
     route.startsWith("/products/") &&
-    /property="og:title" content="Aira Crest \| Premium Dehydrated Foods/i.test(html)
+    /property="og:title" content="Aira Crest \| Banana Powder, Moringa/i.test(html)
   ) {
     missing.push("product-specific og:title");
   }
@@ -365,7 +358,7 @@ function cleanPrerenderHtml(html) {
       const content = metaContent(tag);
       return (
         content.length > 40 &&
-        !content.startsWith("Aira Crest exports premium")
+        !content.startsWith("Bengaluru export house")
       );
     },
   );
@@ -386,7 +379,7 @@ function cleanPrerenderHtml(html) {
       const content = metaContent(tag);
       return (
         content.length > 40 &&
-        !content.startsWith("Aira Crest exports premium")
+        !content.startsWith("Bengaluru export house")
       );
     },
   );
@@ -435,7 +428,7 @@ function replaceOrInsertHeadTag(html, pattern, tag) {
 
 function titleForRoute(route, catalog, html) {
   if (route === "/") {
-    return "Aira Crest | Premium Dehydrated Foods, Spices & Honey Exports";
+    return "Aira Crest | Banana Powder, Moringa and Honey Exporter from India";
   }
   if (route === "/products") return "All Products | Aira Crest";
   if (route === "/blogs") return "Insights & Articles | Aira Crest";
@@ -456,7 +449,7 @@ function titleForRoute(route, catalog, html) {
       (text) =>
         text &&
         text !== "Aira Crest" &&
-        !text.startsWith("Aira Crest | Premium Dehydrated Foods"),
+        !text.startsWith("Aira Crest | Banana Powder, Moringa"),
     );
   return titles.at(-1) || extractTitle(html);
 }

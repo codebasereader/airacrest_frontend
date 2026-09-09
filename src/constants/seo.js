@@ -8,9 +8,9 @@ export const SITE_URL = (
 ).replace(/\/$/, "");
 
 export const DEFAULT_DESCRIPTION =
-  "Aira Crest exports premium dehydrated vegetables & fruits, spices, and natural honey from India, trusted quality, global reach, lasting partnerships.";
+  "Bengaluru export house supplying green banana flour, ripe banana powder, moringa leaf powder and wild forest honey worldwide. FSSAI and APEDA registered.";
 
-export const DEFAULT_TITLE = `${SITE_NAME} | Premium Dehydrated Foods, Spices & Honey Exports`;
+export const DEFAULT_TITLE = `${SITE_NAME} | Banana Powder, Moringa and Honey Exporter from India`;
 
 export const absoluteUrl = (path = "/") => {
   if (!path || path === "/") return `${SITE_URL}/`;
