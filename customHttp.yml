@@ -16,9 +16,11 @@ customHeaders:
         value: "no-cache, no-store, must-revalidate"
       - key: "Pragma"
         value: "no-cache"
-  # Printed QR codes point at these permanent paths - content-type must stay
-  # text/vcard so phones offer "Add Contact" instead of downloading text.
-  - pattern: "/sri"
+  # Printed QR codes point at /sri and /connect, which rewrite to these
+  # files - match the served file path, not the pre-rewrite request path,
+  # or the header rule never fires. Content-type must stay text/vcard so
+  # phones offer "Add Contact" instead of downloading text.
+  - pattern: "/sri.vcf"
     headers:
       - key: "Content-Type"
         value: "text/vcard; charset=utf-8"
@@ -26,7 +28,7 @@ customHeaders:
         value: "inline; filename=\"sri.vcf\""
       - key: "Cache-Control"
         value: "public, max-age=300"
-  - pattern: "/connect"
+  - pattern: "/connect.vcf"
     headers:
       - key: "Content-Type"
         value: "text/vcard; charset=utf-8"
