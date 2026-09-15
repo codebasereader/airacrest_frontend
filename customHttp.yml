@@ -16,6 +16,24 @@ customHeaders:
         value: "no-cache, no-store, must-revalidate"
       - key: "Pragma"
         value: "no-cache"
+  # Printed QR codes point at these permanent paths - content-type must stay
+  # text/vcard so phones offer "Add Contact" instead of downloading text.
+  - pattern: "/sri"
+    headers:
+      - key: "Content-Type"
+        value: "text/vcard; charset=utf-8"
+      - key: "Content-Disposition"
+        value: "inline; filename=\"sri.vcf\""
+      - key: "Cache-Control"
+        value: "public, max-age=300"
+  - pattern: "/connect"
+    headers:
+      - key: "Content-Type"
+        value: "text/vcard; charset=utf-8"
+      - key: "Content-Disposition"
+        value: "inline; filename=\"connect.vcf\""
+      - key: "Cache-Control"
+        value: "public, max-age=300"
 
 redirects:
   # Serve Search Console verification + SEO files as-is (never rewrite to index.html)
@@ -27,6 +45,15 @@ redirects:
     status: "200"
   - source: "/sitemap.xml"
     target: "/sitemap.xml"
+    status: "200"
+
+  # Printed QR codes (business cards/letterheads) - must stay permanent.
+  # Rewrite (not redirect) so the printed URL never changes.
+  - source: "/sri"
+    target: "/sri.vcf"
+    status: "200"
+  - source: "/connect"
+    target: "/connect.vcf"
     status: "200"
 
   # Force apex → www for all paths
