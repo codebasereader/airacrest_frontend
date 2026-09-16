@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   CargoShipIcon,
@@ -12,6 +12,7 @@ import { LineReveal, LineRevealGroup } from "../motion/LineReveal";
 import { fadeUp, stagger } from "../motion/presets";
 import DownloadBrochureButton from "../components/DownloadBrochureButton";
 import BrochureQR from "../components/BrochureQR";
+import TurnstileWidget from "../components/TurnstileWidget";
 import { submitEnquiry } from "../api/enquire";
 import { listPublicProducts } from "../api/productsApi";
 import { normalizeLoadMoreResponse } from "../api/loadMore";
@@ -83,7 +84,12 @@ const INITIAL_FORM = {
   destinationPort: "",
   products: [createProductLine()],
   message: "",
+  // Honeypot: real visitors never see or fill this field. Left blank in
+  // INITIAL_FORM and only ever set by a bot's autofill/scripted submission.
+  companyWebsite: "",
 };
+
+const QUANTITY_DIGIT_PATTERN = /\d/;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -149,6 +155,8 @@ const Enquire = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const isSubmittingRef = useRef(false);
+  const turnstileRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -298,6 +306,8 @@ const Enquire = () => {
 
       if (!line.estimatedQuantity.trim()) {
         lineErrors.estimatedQuantity = "Please enter an estimated quantity.";
+      } else if (!QUANTITY_DIGIT_PATTERN.test(line.estimatedQuantity)) {
+        lineErrors.estimatedQuantity = "Please include a number, e.g. 500 kg or 2 MT.";
       }
 
       if (line.productNote.trim().length > 500) {
@@ -317,31 +327,55 @@ const Enquire = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (isSubmittingRef.current) {
+      return;
+    }
+
     setSubmitError("");
 
     if (!validate()) {
       return;
     }
 
-    const payload = {
-      name: form.name.trim(),
-      companyName: form.companyName.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      country: isOtherCountry ? form.otherCountry.trim() : form.country,
-      destinationPort: form.destinationPort.trim() || undefined,
-      products: form.products.map((line) => ({
-        product: line.productId,
-        estimatedQuantity: line.estimatedQuantity.trim(),
-        packagingPreference: line.packagingPreference || undefined,
-        note: line.productNote.trim() || undefined,
-      })),
-      message: form.message.trim() || undefined,
-    };
+    // Honeypot: real visitors never see or fill this field, so a filled
+    // value means a bot. Pretend success without ever hitting the API —
+    // the backend must repeat this check for bots that skip the browser
+    // entirely and POST straight to the endpoint.
+    if (form.companyWebsite.trim()) {
+      setSubmitted(true);
+      setForm(INITIAL_FORM);
+      setErrors({});
+      return;
+    }
 
+    isSubmittingRef.current = true;
     setSubmitting(true);
 
     try {
+      const turnstileToken = await turnstileRef.current?.execute();
+
+      const payload = {
+        name: form.name.trim(),
+        companyName: form.companyName.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        country: isOtherCountry ? form.otherCountry.trim() : form.country,
+        destinationPort: form.destinationPort.trim() || undefined,
+        products: form.products.map((line) => ({
+          product: line.productId,
+          estimatedQuantity: line.estimatedQuantity.trim(),
+          packagingPreference: line.packagingPreference || undefined,
+          note: line.productNote.trim() || undefined,
+        })),
+        message: form.message.trim() || undefined,
+        turnstileToken: turnstileToken || undefined,
+        // Always empty for a real visitor — sent so the backend can reject
+        // any request that reaches it directly (bypassing this form) with
+        // the honeypot filled in.
+        companyWebsite: form.companyWebsite.trim(),
+      };
+
       await submitEnquiry(payload);
       setSubmitted(true);
       setForm(INITIAL_FORM);
@@ -353,6 +387,8 @@ const Enquire = () => {
           : "Something went wrong. Please try again.",
       );
     } finally {
+      turnstileRef.current?.reset();
+      isSubmittingRef.current = false;
       setSubmitting(false);
     }
   };
@@ -439,6 +475,27 @@ const Enquire = () => {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} noValidate className="p-5 sm:p-8">
+                  {/* Honeypot: hidden from sighted and screen-reader users alike;
+                      only a bot's automated fill will ever populate it. */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden"
+                  >
+                    <label htmlFor="enquiry-company-website">
+                      Leave this field blank
+                    </label>
+                    <input
+                      id="enquiry-company-website"
+                      type="text"
+                      name="companyWebsite"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={form.companyWebsite}
+                      onChange={updateField("companyWebsite")}
+                    />
+                  </div>
+                  <TurnstileWidget ref={turnstileRef} />
+
                   <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
                     <FormField
                       id="enquiry-name"

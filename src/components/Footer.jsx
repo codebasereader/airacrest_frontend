@@ -241,6 +241,18 @@ const Footer = () => {
           >
             |
           </span>
+          <Link
+            to="/privacy-policy"
+            className="text-cream-200/60 no-underline transition-colors hover:text-gold-400"
+          >
+            Privacy Policy
+          </Link>
+          <span
+            className="hidden text-cream-300/30 sm:inline"
+            aria-hidden="true"
+          >
+            |
+          </span>
           <p className="text-cream-200/60">
             Designed and Developed by{" "}
             <a

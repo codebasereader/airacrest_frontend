@@ -64,9 +64,20 @@ The frontend displays `name` in uppercase and sends `_id` as the selected produc
       "note": null
     }
   ],
-  "message": "Looking for long-term supply partnership."
+  "message": "Looking for long-term supply partnership.",
+  "turnstileToken": "0.AAbc...xyz",
+  "companyWebsite": ""
 }
 ```
+
+> **Spam protection fields (added):** `turnstileToken` is the Cloudflare
+> Turnstile response token from the frontend's invisible widget;
+> `companyWebsite` is a honeypot that's always empty for a real visitor.
+> Neither is persisted — the backend must verify/check them before
+> creating the enquiry and reject the request if either check fails. See
+> `BACKEND-TURNSTILE-SETUP.md` for the paste-ready implementation
+> (Turnstile siteverify call, honeypot check, Mongo-backed rate limiting,
+> numeric-only quantity validation).
 
 ### Field mapping (form → API)
 
@@ -279,7 +290,11 @@ The earlier `FRONTEND-INTEGRATION` spec did not include contact fields. **Email*
 
 ## Optional follow-ups (not in current frontend)
 
-- Rate limiting on `POST /api/enquiries` (e.g. per IP)
-- Honeypot or CAPTCHA for spam protection
 - Email notification to sales on new enquiry
 - Webhook / CRM integration
+
+## Spam protection (frontend done, backend required — see above)
+
+Rate limiting, honeypot rejection, and Turnstile verification are no
+longer optional follow-ups — the frontend already sends the signals
+needed for all three. `BACKEND-TURNSTILE-SETUP.md` has the implementation.
