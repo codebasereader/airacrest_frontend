@@ -2,6 +2,14 @@
 # Order matters: specific rules first, SPA fallback last.
 
 customHeaders:
+  # Force HTTPS on every future request (~1yr) so browsers/QR scanners never
+  # make the first hit over plain HTTP - that HTTP hop is what triggers
+  # Chrome's "File can't be downloaded securely" on the /sri and /connect
+  # vCard links.
+  - pattern: "**"
+    headers:
+      - key: "Strict-Transport-Security"
+        value: "max-age=31536000; includeSubDomains; preload"
   # Product/home HTML must not stay cached after a deploy, or buyers keep
   # seeing the previous header/footer WhatsApp numbers and labels.
   - pattern: "**/*.html"
