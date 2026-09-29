@@ -16,11 +16,12 @@ const FloatingWhatsAppButton = ({ sourceTag } = {}) => {
   const { pathname } = useLocation();
   const whatsAppSource = useWhatsAppSource();
 
+  const normalizedPath = pathname.replace(/\/+$/, "") || "/";
   const hideOnRoute =
-    pathname === "/login" ||
-    pathname.startsWith("/admin") ||
-    pathname === "/sri" ||
-    pathname === "/connect";
+    normalizedPath === "/login" ||
+    normalizedPath.startsWith("/admin") ||
+    normalizedPath === "/sri" ||
+    normalizedPath === "/connect";
 
   if (hideOnRoute) {
     return null;
