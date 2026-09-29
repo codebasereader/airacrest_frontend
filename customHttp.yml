@@ -24,16 +24,17 @@ customHeaders:
         value: "no-cache, no-store, must-revalidate"
       - key: "Pragma"
         value: "no-cache"
-  # Printed QR codes point at /sri and /connect, which rewrite to these
-  # files - match the served file path, not the pre-rewrite request path,
-  # or the header rule never fires. Content-type must stay text/vcard so
-  # phones offer "Add Contact" instead of downloading text.
+  # /sri and /connect are now on-screen contact cards (React routes) with a
+  # "Save Contact" button that links straight to these .vcf files. Content-
+  # type must stay text/vcard so phones treat it as a contact, and
+  # Content-Disposition is "attachment" so the button click downloads it
+  # instead of navigating the page there.
   - pattern: "/sri.vcf"
     headers:
       - key: "Content-Type"
         value: "text/vcard; charset=utf-8"
       - key: "Content-Disposition"
-        value: "inline; filename=\"sri.vcf\""
+        value: "attachment; filename=\"sri.vcf\""
       - key: "Cache-Control"
         value: "public, max-age=300"
   - pattern: "/connect.vcf"
@@ -41,7 +42,7 @@ customHeaders:
       - key: "Content-Type"
         value: "text/vcard; charset=utf-8"
       - key: "Content-Disposition"
-        value: "inline; filename=\"connect.vcf\""
+        value: "attachment; filename=\"connect.vcf\""
       - key: "Cache-Control"
         value: "public, max-age=300"
 
@@ -55,15 +56,6 @@ redirects:
     status: "200"
   - source: "/sitemap.xml"
     target: "/sitemap.xml"
-    status: "200"
-
-  # Printed QR codes (business cards/letterheads) - must stay permanent.
-  # Rewrite (not redirect) so the printed URL never changes.
-  - source: "/sri"
-    target: "/sri.vcf"
-    status: "200"
-  - source: "/connect"
-    target: "/connect.vcf"
     status: "200"
 
   # Force apex → www for all paths

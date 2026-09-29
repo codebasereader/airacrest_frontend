@@ -17,7 +17,10 @@ const FloatingWhatsAppButton = ({ sourceTag } = {}) => {
   const whatsAppSource = useWhatsAppSource();
 
   const hideOnRoute =
-    pathname === "/login" || pathname.startsWith("/admin");
+    pathname === "/login" ||
+    pathname.startsWith("/admin") ||
+    pathname === "/sri" ||
+    pathname === "/connect";
 
   if (hideOnRoute) {
     return null;

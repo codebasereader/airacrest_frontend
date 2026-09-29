@@ -21,6 +21,7 @@ import BlogsPage from "./pages/BlogsPage";
 import BlogDetailPage from "./pages/BlogDetailPage";
 import BrochurePage from "./pages/BrochurePage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import ContactCardPage from "./pages/ContactCardPage";
 import LoginPage from "./pages/LoginPage";
 import AdminLayout from "./admin/layout/AdminLayout";
 import AdminCategoriesPage from "./admin/pages/AdminCategoriesPage";
@@ -67,6 +68,11 @@ const App = () => {
         <Route path="/blogs/:slug" element={<BlogDetailPage />} />
         <Route path="/brochure" element={<BrochurePage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/sri" element={<ContactCardPage variant="sri" />} />
+        <Route
+          path="/connect"
+          element={<ContactCardPage variant="connect" />}
+        />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/admin"
